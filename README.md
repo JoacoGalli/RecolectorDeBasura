@@ -10,3 +10,5 @@ entramos en localhost:1880 y tenemos la version grafica de node red, levantamos 
   * select * from "sensor/sensor1" limit 5
 estos pasos son para poder ver que mediciones esta guardando en la base de datos (tambien se pueden ver en node-red agregando un degug y observando en la solapa debug arriba a la derecha)
 - Conviero la data de mqtt a json (para eso agrego un bloque json en nodered y lo pongo que siempre convierta la data a string)
+
+![image](https://user-images.githubusercontent.com/32024224/174883967-b782003d-ea5c-4e4a-afd6-e3c8d68ad140.png)
