@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  grafana:
+    container_name:  grafana
+    image: grafana/grafana
+    restart: unless-stopped
+    environment: 
+      - TZ="Europe/Madrid"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./etc:/etc/grafana
+      - ./lib:/var/lib/grafana
+      - ./log:/var/log/grafana
+      - ./dashboards:/usr/share/grafana/public/dashboards
+    environment: 
+      - "GF_SECURITY_ADMIN_PASSWORD=zJ77UlAG8kqJZw."
+      - "GF_SECURITY_ADMIN_USER=admin"
+      - "GF_SECURITY_SECRET_KEY=su2Tong2zoocie_"
+    ports:
+      - 3000:3000
+    networks:
+      - i40sys
+networks:
+  i40sys:
+    external:
+      name: i40sys

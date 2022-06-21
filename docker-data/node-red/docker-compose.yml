@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  node-red:
+    container_name: node-red
+    image: nodered/node-red:latest
+    environment:
+      - TZ=America
+    volumes:
+      - /dev:/host/dev
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/data
+    network_mode: host
+    healthcheck:
+      test: ["CMD-SHELL","node /healthcheck.js"]
+      interval: 60s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    privileged: true

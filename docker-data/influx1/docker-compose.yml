@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  influx1:
+    container_name: influx1
+    image: influxdb:1.8
+    restart: unless-stopped
+    environment: 
+      - TZ="Europe/Madrid"
+    volumes:
+      - /data/influx1:/var/lib/influxdb
+      - ./etc/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ./backup:/backup
+      - /etc/localtime:/etc/localtime:ro
+    command: -config /etc/influxdb/influxdb.conf
+    networks:
+      - i40sys
+networks:
+  i40sys:
+    external:
+      name: i40sys
