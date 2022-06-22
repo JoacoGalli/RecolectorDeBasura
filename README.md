@@ -1,5 +1,5 @@
 # TrabajoProfesional
-
+- docker network create i40sys (crea una red local para conectar (bridge) los diferentes contenedores)
 - nos conectamos a mosquitto, con un usario y password para que sea mas seguro nuestra conexion, levantamos el docker-compose con docker-compose up -d (el -d es para que se ejecute en modo demonio, lo que hace es ejecutarse pero en background)
 - Nos conectamos a Node Red para eso levantamos el docker-compose (tenemos que estar parados en la carpeta donde esta el achivo docker-compose.yaml)
 entramos en localhost:1880 y tenemos la version grafica de node red, levantamos el flowgraph que arme con sensores que depositan las mediciones en influx (darle arriba a la derecha a Deploy)
