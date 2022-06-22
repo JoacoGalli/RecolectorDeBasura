@@ -10,7 +10,8 @@ services:
       - /dev:/host/dev
       - /etc/localtime:/etc/localtime:ro
       - ./data:/data
-    network_mode: host
+    ports:
+      - '1880:1880'
     healthcheck:
       test: ["CMD-SHELL","node /healthcheck.js"]
       interval: 60s
