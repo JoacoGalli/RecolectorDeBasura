@@ -51,8 +51,8 @@
         "id": "b5291037a6948b34",
         "type": "mqtt in",
         "z": "c9ff43b6ba9cad4d",
-        "name": "Sensor1",
-        "topic": "sensor/sensor1",
+        "name": "SensorTypeA",
+        "topic": "SensorTypeA",
         "qos": "2",
         "datatype": "auto",
         "broker": "726cb163a97d42f2",
@@ -60,7 +60,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 260,
+        "x": 270,
         "y": 280,
         "wires": [
             [
@@ -107,8 +107,8 @@
         "id": "8f6eca5ca7f16fb5",
         "type": "mqtt in",
         "z": "c9ff43b6ba9cad4d",
-        "name": "Sensor2",
-        "topic": "sensor/sensor2",
+        "name": "SensorTypeB",
+        "topic": "SensorTypeB",
         "qos": "2",
         "datatype": "auto",
         "broker": "726cb163a97d42f2",
@@ -116,7 +116,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 240,
+        "x": 250,
         "y": 400,
         "wires": [
             [
