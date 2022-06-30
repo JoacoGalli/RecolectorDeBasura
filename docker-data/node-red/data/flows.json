@@ -39,7 +39,7 @@
         "hostname": "127.0.0.1",
         "port": "8086",
         "protocol": "http",
-        "database": "sensors",
+        "database": "SENSORES_RECOLECTOR",
         "name": "",
         "usetls": false,
         "tls": "",
@@ -64,26 +64,9 @@
         "y": 280,
         "wires": [
             [
-                "4eea7ee021d204ec",
                 "41bf7eea3237fdaa"
             ]
         ]
-    },
-    {
-        "id": "4eea7ee021d204ec",
-        "type": "debug",
-        "z": "c9ff43b6ba9cad4d",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 510,
-        "y": 220,
-        "wires": []
     },
     {
         "id": "41bf7eea3237fdaa",
@@ -91,7 +74,7 @@
         "z": "c9ff43b6ba9cad4d",
         "influxdb": "121a43170c0e2cbd",
         "name": "",
-        "measurement": "sensor/sensor1",
+        "measurement": "Llenado",
         "precision": "",
         "retentionPolicy": "",
         "database": "database",
@@ -99,7 +82,7 @@
         "retentionPolicyV18Flux": "",
         "org": "organisation",
         "bucket": "bucket",
-        "x": 610,
+        "x": 660,
         "y": 340,
         "wires": []
     },
@@ -120,8 +103,7 @@
         "y": 400,
         "wires": [
             [
-                "1d6fb12c9fdedc4f",
-                "b64b9aa862178db9"
+                "1d6fb12c9fdedc4f"
             ]
         ]
     },
@@ -139,24 +121,8 @@
         "retentionPolicyV18Flux": "",
         "org": "organisation",
         "bucket": "bucket",
-        "x": 590,
+        "x": 660,
         "y": 500,
-        "wires": []
-    },
-    {
-        "id": "b64b9aa862178db9",
-        "type": "debug",
-        "z": "c9ff43b6ba9cad4d",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 510,
-        "y": 420,
         "wires": []
     },
     {
@@ -164,7 +130,7 @@
         "type": "mqtt in",
         "z": "c9ff43b6ba9cad4d",
         "name": "Sensor",
-        "topic": "sensor/SENSOR",
+        "topic": "SensorTypeA",
         "qos": "2",
         "datatype": "auto",
         "broker": "726cb163a97d42f2",
@@ -186,18 +152,63 @@
         "z": "c9ff43b6ba9cad4d",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "obj",
         "pretty": false,
         "x": 410,
         "y": 580,
         "wires": [
             [
-                "2312e625bb79367d"
+                "2cde0f28b7178a32"
             ]
         ]
     },
     {
-        "id": "2312e625bb79367d",
+        "id": "2cde0f28b7178a32",
+        "type": "change",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.Contenedores.C1",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 660,
+        "wires": [
+            [
+                "97887511d7144a12"
+            ]
+        ]
+    },
+    {
+        "id": "97887511d7144a12",
+        "type": "influxdb out",
+        "z": "c9ff43b6ba9cad4d",
+        "influxdb": "121a43170c0e2cbd",
+        "name": "Dato contenedor 1",
+        "measurement": "Contenedores",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 650,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "1f1d6a4510d16f99",
         "type": "debug",
         "z": "c9ff43b6ba9cad4d",
         "name": "",
@@ -208,8 +219,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 590,
-        "y": 580,
+        "x": 610,
+        "y": 560,
         "wires": []
     }
 ]
