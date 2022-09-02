@@ -1,0 +1,44 @@
+1656094665: mosquitto version 2.0.14 starting
+1656094665: Config loaded from /mosquitto/config/mosquitto.conf.
+1656094665: Opening ipv4 listen socket on port 1883.
+1656094665: Opening ipv6 listen socket on port 1883.
+1656094665: Opening websockets listen socket on port 9001.
+1656094665: mosquitto version 2.0.14 running
+1656094726: Saving in-memory database to /mosquitto/data/persistence.db.
+1656094787: Saving in-memory database to /mosquitto/data/persistence.db.
+1656094848: Saving in-memory database to /mosquitto/data/persistence.db.
+1656094909: Saving in-memory database to /mosquitto/data/persistence.db.
+1656094970: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095031: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095092: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095153: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095214: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095275: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095336: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095397: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095458: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095519: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095580: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095641: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095702: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095763: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095824: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095885: Saving in-memory database to /mosquitto/data/persistence.db.
+1656095946: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096007: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096068: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096129: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096190: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096251: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096312: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096373: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096434: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096495: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096556: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096617: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096678: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096739: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096800: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096861: Saving in-memory database to /mosquitto/data/persistence.db.
+1656096881: mosquitto version 2.0.14 terminating
+1656096881: Saving in-memory database to /mosquitto/data/persistence.db.

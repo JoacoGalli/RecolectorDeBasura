@@ -11,7 +11,7 @@
         "id": "726cb163a97d42f2",
         "type": "mqtt-broker",
         "name": "MQTT Broker",
-        "broker": "localhost",
+        "broker": "192.168.1.51",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,
@@ -52,7 +52,7 @@
         "type": "mqtt in",
         "z": "c9ff43b6ba9cad4d",
         "name": "Sensor1",
-        "topic": "sensor/sensor1",
+        "topic": "SensorTypeA",
         "qos": "2",
         "datatype": "auto",
         "broker": "726cb163a97d42f2",
@@ -64,8 +64,7 @@
         "y": 280,
         "wires": [
             [
-                "4eea7ee021d204ec",
-                "41bf7eea3237fdaa"
+                "4eea7ee021d204ec"
             ]
         ]
     },
@@ -78,7 +77,8 @@
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "false",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
         "x": 510,
@@ -108,7 +108,7 @@
         "type": "mqtt in",
         "z": "c9ff43b6ba9cad4d",
         "name": "Sensor2",
-        "topic": "sensor/sensor2",
+        "topic": "SensorTypeB",
         "qos": "2",
         "datatype": "auto",
         "broker": "726cb163a97d42f2",
@@ -120,7 +120,6 @@
         "y": 400,
         "wires": [
             [
-                "1d6fb12c9fdedc4f",
                 "b64b9aa862178db9"
             ]
         ]
@@ -163,8 +162,8 @@
         "id": "1cc7760cb8bb3073",
         "type": "mqtt in",
         "z": "c9ff43b6ba9cad4d",
-        "name": "Sensor",
-        "topic": "sensor/SENSOR",
+        "name": "Sensor3",
+        "topic": "ERROR",
         "qos": "2",
         "datatype": "auto",
         "broker": "726cb163a97d42f2",
@@ -172,7 +171,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 230,
+        "x": 240,
         "y": 580,
         "wires": [
             [
