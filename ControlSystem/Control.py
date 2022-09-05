@@ -1,139 +1,76 @@
-from abc import ABC, abstractmethod
-from logging import info
 import time
+from logging import info
+import logging
 
+_STATE = "Turned Off"
 
-# Machine with state-dependent code
-# ---------------------------------
+def setState(newState):
+    global _STATE
+    _STATE = newState
 
-class StateMachine:
+def runTurnedOff():
+    setState("Turned On")
 
-    _state = None
+def runTurnedOn():
+    # iniciar alertas
+    # inciar variables
+    # inciar interrupciones
+    setState("Running")
+    pass
 
-    def __init__(self, state):
-        self.transitionTo(state)
+def runRunning():
+    setState("Active")
+    pass
 
-    def transitionTo(self, state):
-        print(f"[info] Pasando de {type(self._state).__name__} a {type(state).__name__}.")
-        self._state = state
-        self._state.machine = self
+def runAwaiting():
+    pass
 
-    def do(self):
-        self._state.do()
+def runDownloadingContainers():
+    pass
 
-    def measure(self):
-        self._state.measure()
+def runActive():
+    pass
 
+def runLoadBuffer():
+    pass
 
-# Interface to connect states and machine
-# ---------------------------------------
+def runLoadContainer():
+    pass
 
-class State(ABC):
+def runChangeContainer():
+    pass
 
-    datos = 'ger'
+def runHalted():
+    pass
 
-    @property
-    def machine(self):
-        return self._machine
+def runAwaitingAccess():
+    pass
 
-    @machine.setter
-    def machine(self, machine):
-        self._machine = machine
+def runMaintenance():
+    pass
 
-    @abstractmethod
-    def do(self):
-        pass
-
-    @abstractmethod
-    def measure(self):
-        pass
-
-
-# Concrete states
-# ---------------
-
-class StateTurnedOff(State): # APAGADO.
-    def measure(self):
-        pass
-
-    def do(self):
-        print("[APAGADO] alimentacion ok.")
-        self.machine.transitionTo(StateTurnedOn())
-
-class StateTurnedOn(State): # PRENDIDO.
-    def measure(self):
-        pass
-
-    def do(self):
-        print("[PRENDIDO] verificaciones correctas")
-        self.machine.transitionTo(StateRunning())
-
-class StateRunning(State): # OPERANDO.
-    def measure(self):
-        pass
-
-    def do(self):
-        print("[OPERANDO] listo para operar.")
-        self.machine.transitionTo(StateActive())
-        pass
-
-class StateAwaiting(State): # EN ESPERA (OPERANDO).
-    def measure(self):
-        pass
-
-    def do(self):
-        pass
-
-class StateUnloadingPonton(State): # DESCARGANDO PONTON (OPERANDO).
-    def measure(self):
-        pass
-
-    def do(self):
-        pass
-
-class StateActive(State): # ACTIVO (OPERANDO).
-    def measure(self):
-        pass
-
-    def do(self):
-        print("[ACTIVO] controlando .. .. ..")
-        pass
-
-class StateHalted(State): # DETENIDO.
-    def measure(self):
-        pass
-
-    def do(self):
-        pass
-
-class StateAwaitingAccess(State): # ESPERANDO ACCESO (DETENIDO).
-    def measure(self):
-        pass
-
-    def do(self):
-        pass
-
-class StateMaintainace(State): # MAINTAINANCE (DETENIDO).
-    def measure(self):
-        pass
-
-    def do(self):
-        pass
-
-
-# Actual main
-#------------
+_MACHINE = {
+        "Turned Off": runTurnedOff, # Apagado
+        "Turned On": runTurnedOn, # Prendido
+        "Running": runRunning, #Operando
+        "Awaiting": runAwaiting, # En Espera
+        "DownloadingContainers": runDownloadingContainers, # Descargando Contendores
+        "Active": runActive, # Activo
+        "LoadBuffer": runLoadBuffer, # Cargar Buffer
+        "LoadContainer": runLoadContainer, # Captar y distribuir contenedor
+        "ChangeContainer": runChangeContainer, # Cambiar de contendor
+        "Halted": runHalted,  # Detenido
+        "AwaitingAccess": runAwaitingAccess,  # Esperando Accesso
+        "Maintenance": runMaintenance,  # Mantenimiento
+    }
 
 def main():
-    app = StateMachine(StateTurnedOff())
+    logging.getLogger().setLevel(logging.INFO)
+
     while(True):
-        app.measure()
-        app.do()
+        info(f"Currente state: <{_STATE}>")
+        _MACHINE[_STATE]()
         time.sleep(2)
-
-
 
 if __name__ == "__main__":
     main()
-
-#TODO: use logging info!
