@@ -54,8 +54,8 @@ void setup() {
 
 void loop() {
   if (!client.connected()) {
-      while (!client.connected()) {               // Loop until we're reconnected 
-        client.connect("GER-ESP8266Client-");     // it's irrelevant
+      while (!client.connected()) {
+        client.connect("IRF-Client-");
       }
   }
   client.loop();
