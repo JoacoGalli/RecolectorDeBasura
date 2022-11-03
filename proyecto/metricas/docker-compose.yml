@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  influxdb:
+    container_name: influxdb
+    image: influxdb:2.4.0-alpine
+    volumes:
+      - influxdb-lib:/var/lib/influxdb2
+    env_file:
+      # BE SURE TO CHANGE THIS LINE BEFORE GOING TO PRODUCTION
+      - influx1/influxdb.env
+    ports:
+      - 8086:8086
+    restart: always
+    privileged: true
+
+  grafana:
+    container_name: grafana2
+    image: grafana/grafana-oss:9.2.2
+    volumes:
+      #- ./grafana/etc:/etc/grafana:ro
+      #- grafana-lib:/var/lib/grafana
+      #- grafana-log:/var/log/grafana
+      - /etc/localtime:/etc/localtime:ro
+      - ./dashboards:/usr/share/grafana/public/dashboards
+    links:
+      - influxdb:influxdb
+    environment:
+      # BE SURE TO CHANGE THIS LINE BEFORE GOING TO PRODUCTION
+      #- ./grafana.env
+      - "GF_SECURITY_ADMIN_PASSWORD=123456"
+      - "GF_SECURITY_ADMIN_USER=admin"
+      - "GF_SECURITY_SECRET_KEY=su2Tong2zoocie"
+    ports:
+      - 3000:3000
+    depends_on:
+      - influxdb
+    restart: always
+    privileged: true
+
+volumes:
+  influxdb-lib:
+    external: false
+
+  grafana-lib:
+    external: false
+
+  grafana-log:
+    external: false
