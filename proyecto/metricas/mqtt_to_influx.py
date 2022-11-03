@@ -15,7 +15,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 
 INFLUXDB_ADDRESS = 'http://localhost:8086'
-INFLUXDB_USER = 'tesis'
+INFLUXDB_USER = 'root'
 INFLUXDB_PASSWORD = '123456789'
 INFLUXDB_DATABASE = 'metricas'
 
@@ -26,7 +26,7 @@ MQTT_TOPIC = 'contenedores/#'  # [room]/[temperature|humidity|light|status]
 #MQTT_REGEX = 'home/([^/]+)/([^/]+)'
 #MQTT_CLIENT_ID = 'MQTTInfluxDBBridge'
 
-influxdb_client = InfluxDBClient(url=INFLUXDB_ADDRESS, token='Ds2k1pVc9Qg5AKOw5WMsDBg8rqGpt_iPzbcWSOW1tNazMRzAMNU8PlebG-EidTI_vAOryTAHIlRJ22UqFsNp7A==', debug=None, org='tesis')
+influxdb_client = InfluxDBClient(url=INFLUXDB_ADDRESS, token='recolector_de_basura', debug=None, org='recolector')
 write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 print("hola")
 
@@ -76,7 +76,7 @@ def _send_sensor_data_to_influxdb(sensor_data):
         }
     print(json_body)
     point = Point.from_dict(json_body, WritePrecision.NS)
-    write_api.write("metricas", "tesis", point)
+    write_api.write("metricas", "recolector", point)
     print(f"escribi {point}")
 
 
