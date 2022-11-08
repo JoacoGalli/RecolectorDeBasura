@@ -20,18 +20,14 @@ INFLUXDB_PASSWORD = '123456789'
 INFLUXDB_DATABASE = 'metricas'
 
 MQTT_ADDRESS = 'localhost'
-#MQTT_USER = 'iotuser'
-#MQTT_PASSWORD = 'iotpassword'
-MQTT_TOPIC = 'contenedores/#'  # [room]/[temperature|humidity|light|status]
-#MQTT_REGEX = 'home/([^/]+)/([^/]+)'
-#MQTT_CLIENT_ID = 'MQTTInfluxDBBridge'
+MQTT_TOPIC = 'metricas/#'  # [room]/[temperature|humidity|light|status]
+
 
 influxdb_client = InfluxDBClient(url=INFLUXDB_ADDRESS, token='recolector_de_basura', debug=None, org='recolector')
 write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
-print("hola")
 
 class SensorData(NamedTuple):
-    position: str
+    tag: str
     measurement: str
     value: float
 
@@ -40,7 +36,6 @@ def on_connect(client, userdata, flags, rc):
     """ The callback for when the client receives a CONNACK response from the server."""
     print('Connected with result code ' + str(rc))
     client.subscribe(MQTT_TOPIC)
-    print("pase")
 
 
 def on_message(client, userdata, msg):
@@ -52,28 +47,26 @@ def on_message(client, userdata, msg):
 
 
 def _parse_mqtt_message(topic, payload):
-    #match = re.match(MQTT_REGEX, topic)
-    msg = topic.split('/') # contenedores/contenedor1
+    msg = topic.split('/') # [measurement,tag] [metrica,buffer]
+    print(msg)
     if msg:
-        position = msg[1]
         measurement = msg[0]
-        if measurement == 'status':
-            return None
-        return SensorData(position, measurement, float(payload))
+        tag = msg[1]
+        return SensorData(tag, measurement, float(payload))
     else:
         return None
 
 
 def _send_sensor_data_to_influxdb(sensor_data):
     json_body ={
-            'measurement': sensor_data.measurement,
-            'tags': {
-                'position': sensor_data.position
-            },
-            'fields': {
-                'value': sensor_data.value
-            }
+        'measurement': sensor_data.measurement,
+        'tags': {
+            'sensor': sensor_data.tag
+        },
+        'fields': {
+            'value': sensor_data.value
         }
+    }
     print(json_body)
     point = Point.from_dict(json_body, WritePrecision.NS)
     write_api.write("metricas", "recolector", point)

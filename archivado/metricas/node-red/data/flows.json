@@ -1,0 +1,243 @@
+[
+    {
+        "id": "c9ff43b6ba9cad4d",
+        "type": "tab",
+        "label": "Sensor MQTT InfluxDB",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "726cb163a97d42f2",
+        "type": "mqtt-broker",
+        "name": "MQTT Broker",
+        "broker": "192.168.1.51",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "370",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "121a43170c0e2cbd",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "SENSORES_RECOLECTOR",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://influxdb:8086",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "b5291037a6948b34",
+        "type": "mqtt in",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "Sensor1",
+        "topic": "SensorTypeA",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "726cb163a97d42f2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 270,
+        "y": 280,
+        "wires": [
+            [
+                "4eea7ee021d204ec"
+            ]
+        ]
+    },
+    {
+        "id": "4eea7ee021d204ec",
+        "type": "debug",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "41bf7eea3237fdaa",
+        "type": "influxdb out",
+        "z": "c9ff43b6ba9cad4d",
+        "influxdb": "121a43170c0e2cbd",
+        "name": "",
+        "measurement": "Llenado",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 660,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "8f6eca5ca7f16fb5",
+        "type": "mqtt in",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "Sensor2",
+        "topic": "SensorTypeB",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "726cb163a97d42f2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 250,
+        "y": 400,
+        "wires": [
+            [
+                "b64b9aa862178db9"
+            ]
+        ]
+    },
+    {
+        "id": "1d6fb12c9fdedc4f",
+        "type": "influxdb out",
+        "z": "c9ff43b6ba9cad4d",
+        "influxdb": "121a43170c0e2cbd",
+        "name": "",
+        "measurement": "sensor/sensor2",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 660,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "1cc7760cb8bb3073",
+        "type": "mqtt in",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "Sensor3",
+        "topic": "ERROR",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "726cb163a97d42f2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 240,
+        "y": 580,
+        "wires": [
+            [
+                "bbd737b224953d7e"
+            ]
+        ]
+    },
+    {
+        "id": "bbd737b224953d7e",
+        "type": "json",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 410,
+        "y": 580,
+        "wires": [
+            [
+                "2cde0f28b7178a32"
+            ]
+        ]
+    },
+    {
+        "id": "2cde0f28b7178a32",
+        "type": "change",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.Contenedores.C1",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 660,
+        "wires": [
+            [
+                "97887511d7144a12"
+            ]
+        ]
+    },
+    {
+        "id": "97887511d7144a12",
+        "type": "influxdb out",
+        "z": "c9ff43b6ba9cad4d",
+        "influxdb": "121a43170c0e2cbd",
+        "name": "Dato contenedor 1",
+        "measurement": "Contenedores",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 650,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "1f1d6a4510d16f99",
+        "type": "debug",
+        "z": "c9ff43b6ba9cad4d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 560,
+        "wires": []
+    }
+]
