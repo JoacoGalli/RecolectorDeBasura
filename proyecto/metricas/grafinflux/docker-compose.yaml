@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  influxdb:
+    container_name: influxdb_recolector
+    image: influxdb:2.4.0-alpine
+    volumes:
+      - influxdb-storage:/var/lib/influxdb2
+      - influxdb-config:/root/.influxdbv2
+    environment:
+      - 'DOCKER_INFLUXDB_INIT_MODE=setup'
+      - 'DOCKER_INFLUXDB_INIT_USERNAME=root'
+      - 'DOCKER_INFLUXDB_INIT_PASSWORD=123456789'
+      - 'DOCKER_INFLUXDB_INIT_ORG=recolector'
+      - 'DOCKER_INFLUXDB_INIT_BUCKET=metricas'
+      - 'DOCKER_INFLUXDB_INIT_RETENTION=1w'
+      - 'DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=recolector_de_basura'
+    ports:
+      - "8086:8086"
+    restart: always
+    privileged: true
+
+  grafana:
+    container_name: grafana_recolector
+    image: grafana/grafana-oss:9.2.0
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - 'GF_AUTH_DISABLE_LOGIN_FORM=true'
+      - 'GF_AUTH_ANONYMOUS_ENABLED=true'
+      - 'GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.'
+      - 'GF_AUTH_ANONYMOUS_ORG_ROLE=Admin'
+      - 'GF_USERS_ALLOW_SIGN_UP=false'
+      - 'GF_INFLUXDB_TOKEN=recolector_de_basura'
+      - 'GF_INFLUXDB_DEFAULT_BUCKET=metricas'
+      - 'GF_INFLUXDB_ORG=recolector'
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    restart: always
+    privileged: true
+
+volumes:
+  influxdb-storage:
+  influxdb-config:
+  grafana-storage:

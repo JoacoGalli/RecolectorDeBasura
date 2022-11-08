@@ -1,1 +1,1 @@
-docker stop node-red mqtt grafana influx1
+docker stop mqtt grafana_recolector influx_recolector

@@ -1,0 +1,14 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    uid: 'BwDD30WVz'
+    url: http://influxdb:8086
+    secureJsonData:
+      token: ${GF_INFLUXDB_TOKEN}
+    jsonData:
+      version: Flux
+      organization: ${GF_INFLUXDB_ORG}
+      defaultBucket: ${GF_INFLUXDB_DEFAULT_BUCKET}
+      tlsSkipVerify: true
