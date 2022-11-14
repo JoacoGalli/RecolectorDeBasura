@@ -70,7 +70,34 @@ def main():
     while(True):
         info(f"Currente state: <{_STATE}>")
         _MACHINE[_STATE]()
-        time.sleep(2)
+        sensar_si_esta_contenedor()
+        if esta_contenedor:
+            lleno = medir_llenado_tachos() # lleno puede ser una variable booleana global que me indique si TODOS los tachos estan llenos
+            tacho_actual = elegir_tacho_a_llenar() # esta activa cual es el tacho actual, por ej = tacho_actual = 3
+            if lleno == False:
+                camara_inicio = medicion_camara()
+                if camara_inicio > 90:
+                    activar_motores(rotacion=True)
+                    camara_actual = camara_inicio
+                    while camara_actual > 20 or lleno == False:
+                        time.sleep(2) # este tiempo se va a cambiar dependiendo el tiempo que tarde en llenarse
+                        tacho.llenado = sensar_tacho(tacho.posicion)
+                        tiempo_inicial = time.time()
+                        tf = 0 # este tf esta por si pasa mas de cierto tiempo y el buffer se vacio. se deberia medir el tiempo total que tarde en llenarse un tacho
+                        while tacho.llenado < 80 or tf > 30:
+                            tacho.llenado = sensar_tacho()
+                            tf = time.time() - tiempo_inicial
+
+                        elegir_patron_llenado() #elige a cual tacho moverme y me muevo, leyendo el porcentaje actual de cada uno de los tachos (que me lo devolvio el medir llenado de los tachos)
+                        # decidir si se mide la inclinacion tambien o no (podria estar adentro de elegir_patron_llenado())
+                        camara_actual = medicion_camara()
+        else:
+            continue
+
+        #time.sleep(2)
 
 if __name__ == "__main__":
     main()
+
+
+# Medir la bateria y mandarla al dashboard
