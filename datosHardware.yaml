@@ -34,10 +34,10 @@ Gy-53 Vl53l0x (laser):                  CUAL COMPRAMOS AL FINAL??
   - nota: "IR-proximity-sensor-x10" lo habiamos descartado!
 
 IR-proximity-sensor-x10:
-  - cantidad: 2
-  - uso: alarma del ponton, y alarma de altura de residuo.
+  - cantidad: 1
+  - uso: alarma de los contenedores.
   - VCC, GND, y data. es basico, pq solo devuelve True/False.
-  - total: 2 pin de datos.
+  - total: 1 pin de datos.
 
 motor Nema 17:
   - cantidad: 1
@@ -89,18 +89,18 @@ driver TB6600:
 ===================================================================================================
 RESUMEN:
   - pines de GIPIO: 
-    - 6 (HC-SR04), 2 (laser), 9 (drivers), 2 (laser obstaculos)
-    - total: 19 pines.
+    - 6 (HC-SR04), 2 (laser), 9 (drivers), 1 (laser obstaculos)
+    - total: 18 pines.
 
   - cables de datos: 
-    - 6 (HC-SR04), 2 (laser), 9 (drivers), 2 (laser obstaculos)
-    - total: 19 cables de datos.
+    - 6 (HC-SR04), 2 (laser), 9 (drivers), 1 (laser obstaculos)
+    - total: 18 cables de datos.
 
   - cables alimentacion:
     - baja pot:
       - un par naranja-negro, para
-        3 (HC-SR04), 1 laser, 3 drivers, 2 laser barrera, 2 "anodo comun".
-      - total: 11 naranjas y 11 negros.
+        3 (HC-SR04), 1 laser, 3 drivers, 1 laser barrera, 2 "anodo comun".
+      - total: 10 naranjas y 10 negros.
 
     - alta pot:   
       - 3 rojos, 3 negros para los drivers.
