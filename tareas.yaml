@@ -76,6 +76,7 @@ cables:
   por ejemplo, los motores llevan uno, los datos llevan otro.
   - cuantos comprar.
   - importante: testear el largo. checkear que los sensores soporten al menos 2 metros de largo.
+    - hacer cuenta del largo y capacidad!
   - importante: los motores de distribucion se desplazan, contemplar eso con el cable! eg, puente grua.
   - pensar tmb todas las borneras necesarias.
 
@@ -145,9 +146,13 @@ fin de semana (sabado 4):
       - componentes: 
         1. bateria.
         2. las 2 fuentes switching.
-        3. los 3 drivers (2 grande y uno chiquito).
+        3. los 3 drivers (2 TB6600 y 1 A4988).
       - pensar como vamos a conectar todo ello ahi dentro. 
       - evaluar la ventilacion de esta caja, por el tema del calor! (aunque pierda aislacion).
+      - A4988: seguramente necesite disipador.
+      - TB6600: 
+        - ver lo de modo emision comun, o coletor comun.
+        - anguloFinal = 1.8°/micropaso;  eg, 1.8°/4=0.45.
 
     - cables:
       - a los sensores soldarles su cable, directamente. solo queda libre, la parte de bornera.
