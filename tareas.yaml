@@ -151,8 +151,9 @@ fin de semana (sabado 4):
       - evaluar la ventilacion de esta caja, por el tema del calor! (aunque pierda aislacion).
       - A4988: seguramente necesite disipador.
       - TB6600: 
-        - ver lo de modo emision comun, o coletor comun.
+        - ver lo de modo "anodo comun" (hay 3 patas, que van a 5V; y activa por 0s).
         - anguloFinal = 1.8°/micropaso;  eg, 1.8°/4=0.45.
+        - si el motor vibra y no gira, hay que invertir la bobina.
 
     - cables:
       - a los sensores soldarles su cable, directamente. solo queda libre, la parte de bornera.
