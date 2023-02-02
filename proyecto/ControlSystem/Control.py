@@ -1,25 +1,24 @@
 import time
 from logging import info
 import logging
+from clases import Motores_rotacion, Maquina_del_mal, Camara
 
-_STATE = "Turned Off"
+# _STATE = "Turned Off"
 
-def setState(newState):
-    global _STATE
-    _STATE = newState
+# def setState(newState):
+#     global _STATE
+#     _STATE = newState
 
 def runTurnedOff():
-    setState("Turned On")
+    pass
 
 def runTurnedOn():
     # iniciar alertas
     # inciar variables
     # inciar interrupciones
-    setState("Running")
     pass
 
 def runRunning():
-    setState("Active")
     pass
 
 def runAwaiting():
@@ -49,39 +48,28 @@ def runAwaitingAccess():
 def runMaintenance():
     pass
 
-_MACHINE = {
-        "Turned Off": runTurnedOff, # Apagado
-        "Turned On": runTurnedOn, # Prendido
-        "Running": runRunning, #Operando
-        "Awaiting": runAwaiting, # En Espera
-        "DownloadingContainers": runDownloadingContainers, # Descargando Contendores
-        "Active": runActive, # Activo
-        "LoadBuffer": runLoadBuffer, # Cargar Buffer
-        "LoadContainer": runLoadContainer, # Captar y distribuir contenedor
-        "ChangeContainer": runChangeContainer, # Cambiar de contendor
-        "Halted": runHalted,  # Detenido
-        "AwaitingAccess": runAwaitingAccess,  # Esperando Accesso
-        "Maintenance": runMaintenance,  # Mantenimiento
-    }
-
 def main():
     logging.getLogger().setLevel(logging.INFO)
+    maquina = Maquina_del_mal()
+    motores_rotacion = Motores_rotacion()
+    camara = Camara()
 
     while(True):
-        info(f"Currente state: <{_STATE}>")
-        _MACHINE[_STATE]()
-        sensar_si_esta_contenedor()
-        if esta_contenedor:
-            lleno = medir_llenado_tachos() # lleno puede ser una variable booleana global que me indique si TODOS los tachos estan llenos
-            tacho_actual = elegir_tacho_a_llenar() # esta activa cual es el tacho actual, por ej = tacho_actual = 3
-            if lleno == False:
-                camara_inicio = medicion_camara()
-                if camara_inicio > 90:
-                    activar_motores(rotacion=True)
-                    camara_actual = camara_inicio
-                    while camara_actual > 20 or lleno == False:
+        # info(f"Currente state: <{_STATE}>")
+        # _MACHINE[_STATE]()
+        if maquina.esta_ponton():
+
+            for i in range(4):
+                maquina.trasladar_cinta(i)
+                ubicacion_cinta = maquina.ubicacion_cinta()
+                maquina.medir_llenado_tachos()
+            tacho_actual = elegir_tacho_a_llenar(maquina.contenedores, motores_rotacion) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
+            if tacho_actual != False: 
+                if camara.buffer > 70:
+                    motores_rotacion.motor_status = 'on' # el thread de los motores de rotacion arranca
+                    while camara.buffer > 20 or maquina.contenedores[maquina.posicion_cinta] < 90 or maquina.contenedores[maquina.posicion_cinta + 4] < 90:
                         time.sleep(2) # este tiempo se va a cambiar dependiendo el tiempo que tarde en llenarse
-                        tacho.llenado = sensar_tacho(tacho.posicion)
+                        maquina.medir_llenado_tachos()
                         tiempo_inicial = time.time()
                         tf = 0 # este tf esta por si pasa mas de cierto tiempo y el buffer se vacio. se deberia medir el tiempo total que tarde en llenarse un tacho
                         while tacho.llenado < 80 or tf > 30:
@@ -97,6 +85,7 @@ def main():
         #time.sleep(2)
 
 if __name__ == "__main__":
+
     main()
 
 
