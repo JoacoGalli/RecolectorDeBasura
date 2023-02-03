@@ -1,6 +1,8 @@
 import threading
 import time
 
+from sensores import medir_si_esta_ponton, medir_ubicacion_cinta, mover_cinta_traslacion, medir_buffer, activar_motores_rotacion, reset_motores_rotacion
+
 class Maquina_del_mal():
     def __init__(self):
         self.ponton = False
@@ -9,7 +11,7 @@ class Maquina_del_mal():
         self.buffer = None
         self.motor_rotacion = False # True=On False=Off
         self.motor_traslacion = False
-        self.posicion_cinta = None
+        self.posicion_cinta = None # 1 2 3 4 
 
     def esta_ponton(self):
         self.ponton = medir_si_esta_ponton()
@@ -32,20 +34,20 @@ class Maquina_del_mal():
         return self.buffer
 
 
-class Motores_rotacion(threading.Thread):
+class Motores_rotacion(threading.Thread): # posdemos usar 1 solo thread??
     def __init__(self):
         super().__init__()
         self.daemon = True
         self.motores_status = 'off' # on, off, reset
+        self.sentido = None # "right" "left"
     
     def run(self):
         while(True):
             if self.motores_status == 'on':
-                activar_motores_rotacion()
+                activar_motores_rotacion(self.sentido)
             if self.motores_status == 'reset':
                 reset_motores_rotacion()
                 self.motores_status = 'off'
-
 
 class Camara(threading.Thread):
     def __init__(self):
