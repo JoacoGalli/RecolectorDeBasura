@@ -13,11 +13,19 @@ from hilbertcurve.hilbertcurve import HilbertCurve
 # hilbert_curves_points.append([])
 # n_hil = 2
 
-# for p_hil in range(1, 12): # resolución máxima 4K
-#     hilbert_curves.append(HilbertCurve(p_hil, n_hil))
-#     hilbert_curves_points.append(hilbert_curves[p_hil].points_from_distances(range(1, (n_hil**p_hil)**2)))
+# # for p_hil in range(1, 12): # resolución máxima 4K
+# #     hilbert_curves.append(HilbertCurve(p_hil, n_hil))
+# #     hilbert_curves_points.append(hilbert_curves[p_hil].points_from_distances(range(1, (n_hil**p_hil)**2)))
 
-with open('datos_hilbert.pkl','rb') as hil_file:
+# hilbert_curves.append(HilbertCurve(11, n_hil))
+# hilbert_curves_points.append(hilbert_curves[1].points_from_distances(range(1, (n_hil**11)**2)))
+
+# with open('datos_hilbert_2.pkl', "wb") as f:
+#     pickle.dump(hilbert_curves, f)
+#     pickle.dump(hilbert_curves_points, f)
+    
+
+with open('datos_hilbert_2.pkl','rb') as hil_file:
     hilbert_curves = pickle.load(hil_file)
     hilbert_curves_points = pickle.load(hil_file)
 
@@ -34,10 +42,12 @@ def hilbert_img(img, edge_thr = 0.05):
     max_dim = np.max(img.shape[:2])
     n_hil = 2
     p_hil = np.ceil(np.log2(max_dim)).astype(int)
+    #p_hil = 1 el valor que me da p_hil con la resolucion que yo quiero es el que tengo que generar y nada mas.
+    print(p_hil)
     square_size = n_hil**p_hil
     img_edge = np.ones((square_size, square_size))
     img_hilbert = np.zeros((square_size, square_size))
-
+    p_hil = 1
     previous_point = hilbert_curves_points[p_hil][0]
     for point in hilbert_curves_points[p_hil]:
         if point[0] < img.shape[0] and point[1] < img.shape[1]:
