@@ -7,27 +7,27 @@ from tqdm import tqdm
 
 from hilbertcurve.hilbertcurve import HilbertCurve
 
-hilbert_curves = []
-hilbert_curves_points = []
-hilbert_curves.append([])
-hilbert_curves_points.append([])
-n_hil = 2
+#hilbert_curves = []
+#hilbert_curves_points = []
+#hilbert_curves.append([])
+#hilbert_curves_points.append([])
+#n_hil = 2
 
 # for p_hil in range(1, 12): # resolución máxima 4K
 #     hilbert_curves.append(HilbertCurve(p_hil, n_hil))
 #     hilbert_curves_points.append(hilbert_curves[p_hil].points_from_distances(range(1, (n_hil**p_hil)**2)))
 
-hilbert_curves.append(HilbertCurve(10, n_hil))
-hilbert_curves_points.append(hilbert_curves[1].points_from_distances(range(1, (n_hil**10)**2)))
+#hilbert_curves.append(HilbertCurve(10, n_hil))
+#hilbert_curves_points.append(hilbert_curves[1].points_from_distances(range(1, (n_hil**10)**2)))
 
-with open('hilbert_10.pkl', "wb") as f:
-    pickle.dump(hilbert_curves, f)
-    pickle.dump(hilbert_curves_points, f)
+#with open('hilbert_10.pkl', "wb") as f:
+#    pickle.dump(hilbert_curves, f)
+#    pickle.dump(hilbert_curves_points, f)
     
 
-# with open('datos_hilbert_2.pkl','rb') as hil_file:
-#    hilbert_curves = pickle.load(hil_file)
-#    hilbert_curves_points = pickle.load(hil_file)
+with open('hilbert_10.pkl','rb') as hil_file:
+    hilbert_curves = pickle.load(hil_file)
+    hilbert_curves_points = pickle.load(hil_file)
 
 """## Preprocesamiento"""
 

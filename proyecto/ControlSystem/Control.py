@@ -1,77 +1,107 @@
 import time
 import logging
 
-from clases import Motores_rotacion, Maquina_del_mal, Camara
-from sensores import configurar_sensores
+from clases import Motores_rotacion, Motores_traslacion, Maquina_del_mal, Camara
+#from sensores import configurar_sensores
 
 def elegir_tacho_a_llenar(contenedores: dict) -> int or False :
+    print("Elijo que tacho quiero llenar")
     aux = []
+    clockwise = None
     for contenedor in range(len(contenedores)):
-        aux.append(contenedores[str(contenedor + 1)])
+        aux.append(contenedores[str(contenedor)])
 
-    posible_opcion =aux.index(min(aux)) + 1 
+    posible_opcion =aux.index(min(aux))
     if posible_opcion <= 4:
-        sentido = "izquierda"
+        clockwise = True
     else:
-        sentido = "derecha"
+        clockwise = False
 
     if contenedores[str(posible_opcion)] > 95:
         posible_opcion = False
 
-    return posible_opcion, sentido
+    return posible_opcion, clockwise
+
+def mover_cinta(maquina, traslacion, pos):       
+    if (maquina.posicion_cinta - pos) > 0 :
+        traslacion.clockwise = False
+        traslacion.motores_status = "on"
+        print(f"{maquina.posicion_media[str(pos)]=}")
+        print(f"{maquina.posicion_cinta_cm}")
+        while not ( (maquina.posicion_media[str(pos)] - 1) < maquina.posicion_cinta_cm < (maquina.posicion_media[str(pos)] + 1)) :
+            #print(" no salgo del while")
+            maquina.ubicacion_cinta()
+            time.sleep(0.2)
+        traslacion.motores_status = "off"
+    elif (maquina.posicion_cinta - pos) < 0: 
+        traslacion.clockwise = True
+        traslacion.motores_status = "on"
+        while not( maquina.posicion_media[str(pos)] - 1 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)] + 1) :
+            maquina.ubicacion_cinta()
+            time.sleep(0.2)
+        traslacion.motores_status = "off"
+    else:
+        print("ya estoy aca segui")
+    print("llegue al que elegi, ahora lleno")
 
 
-
-        #time.sleep(2)
 
 if __name__ == "__main__":
-    configurar_sensores()
-    logger = logging.get_logger()
     # Definimos las 3 clases (3 threads)
     maquina = Maquina_del_mal()
     motores_rotacion = Motores_rotacion()
+    traslacion = Motores_traslacion()
+    time.sleep(1)
+    motores_rotacion.start()
+    traslacion.start()
     camara = Camara()
-    posiciones_cinta = 4
-    max_tiempo = 10
+    camara.start()
+
     while(True):
         if maquina.esta_ponton():
-            for posicion in range(posiciones_cinta):
-                maquina.trasladar_cinta(posicion)
-                ubicacion_cinta = maquina.ubicacion_cinta()
-                maquina.medir_llenado_tachos()
-
+            maquina.ubicacion_cinta()
+            for posicion in range(4):
+                print(f"{posicion=} y {maquina.posicion_cinta}")
+                time.sleep(0.8)
+                mover_cinta(maquina, traslacion, posicion)
+                print("mido los tachos")
+                maquina.medir_llenado_tachos(1) #mido el de adelante
+                #maquina.medir_llenado_tachos(2) # mido el de atras
+            print("********% contenedores**************")
+            print(f"{maquina.contenedores=}")
             tacho_actual, motores_rotacion.sentido = elegir_tacho_a_llenar(maquina.contenedores) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
-            if tacho_actual != False:  # else WARNING VACIAME LOS TACHOS FRENALO
-                maquina.trasladar_cinta(tacho_actual) #ojo puedo mover y medir a la vez o tengo que hacer otro thred??
-                time.sleep(max_tiempo) # mover de la pos 1 a la 4
-                while maquina.posicion_cinta != tacho_actual or maquina.posicion_cinta != tacho_actual + 4:
-                    time.sleep(2)
-                    maquina.ubicacion_cinta()
-
+            if tacho_actual != False:
+                mover_cinta(maquina, traslacion, tacho_actual)
                 if camara.buffer > 70:
                     while camara.buffer > 20:
-                        motores_rotacion.motor_status = 'on' # el thread de los motores de rotacion arranca 
-                        while maquina.contenedores[tacho_actual] < 90:
-                            time.sleep(2) # este tiempo se va a cambiar dependiendo el tiempo que tarde en llenarse
-                            maquina.medir_llenado_tachos()
+                        while maquina.contenedores[str(maquina.posicion_cinta)] < 60:
+                            motores_rotacion.motores_status = "on"
+                            maquina.medir_llenado_tachos(1)
+                            time.sleep(0.5)
+                        motores_rotacion.motores_status = "off"
                         
-                        motores_rotacion.motor_status = 'reset'
                         tacho_actual, motores_rotacion.sentido = elegir_tacho_a_llenar(maquina.contenedores) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
                         if tacho_actual != False:  # else WARNING VACIAME LOS TACHOS FRENALO
-                            maquina.trasladar_cinta(tacho_actual) #ojo puedo mover y medir a la vez o tengo que hacer otro thred??
-                            while maquina.posicion_cinta != tacho_actual or maquina.posicion_cinta != tacho_actual + 4:
-                                time.sleep(2)
-                                maquina.ubicacion_cinta()
+                            mover_cinta(maquina, traslacion, tacho_actual)
+                            #while maquina.posicion_cinta != tacho_actual or maquina.posicion_cinta != tacho_actual + 4:
+                            #    time.sleep(2)
+                            #    maquina.ubicacion_cinta()
                         else:
                             """stop()"""
-                            logger.warning("Los tachos estan llenos!!")
+                            print("Los tachos estan llenos!!")
+                            break
+                else:
+                    while camara.buffer < 70:
+                        print("sacando fotos")
+                        time.sleep(5)
+                    
+                
             else:
                 """stop()"""
-                logger.warning("Los tachos estan llenos!!")
+                print("Los tachos estan llenos!!")
         else:
             """stop()"""
-            logger.warning("No esta el ponton")
-            time.sleep(30)
-
+            print("No esta el ponton")
+            break
 
 # Medir la bateria y mandarla al dashboard
