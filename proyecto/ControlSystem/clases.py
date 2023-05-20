@@ -18,7 +18,15 @@ class Maquina_del_mal():
         return self.ponton
     
     def ubicacion_cinta(self): # existen cuatro ubicaciones
-        self.posicion_cinta = medir_ubicacion_cinta()
+        self.posicion_cinta_cm = medir_ubicacion_cinta()
+        if 0 < self.posicion_cinta_cm < 4:
+            self.posicion_cinta = 1
+        if 0 < self.posicion_cinta_cm < 4:
+            self.posicion_cinta = 1
+        if 0 < self.posicion_cinta_cm < 4:
+            self.posicion_cinta = 1
+        if 0 < self.posicion_cinta_cm < 4:
+            self.posicion_cinta = 1
         return self.posicion_cinta
 
     def trasladar_cinta(self, nueva_posicion):

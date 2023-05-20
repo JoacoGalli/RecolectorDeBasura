@@ -41,11 +41,11 @@ import os
 
 # file_acumar = drive.CreateFile({'id':'1HowdvZ70LubP5u2gpNY1YimIcFr03wrj'}) # los links están actualizados
 # file_acumar.GetContentFile('basura_000.png')
-# img_acumar = img.imread('basura_000.png')
+img_acumar = img.imread('../../../proyecto/mediciones/fotos_buffer/otros/buffer_tapas_plasticas_verde.png')
 
 # file_buffer = drive.CreateFile({'id':'1pbKwsFAAQdQXWaddtCK7OccS87Rr3N_L'}) # los links están actualizados
 # file_buffer.GetContentFile('buffer_000.png')
-# img_buffer_acumar = img.imread('buffer_000.png')
+img_buffer_acumar = img.imread("../../../proyecto/mediciones/fotos_buffer/buffer_vacio_negro.png")
 
 # dpi de la imagen para imprimir en pantalla
 mpl.rcParams['figure.dpi'] = 300
@@ -71,19 +71,19 @@ Si se quiere realizar pruebas con todas las imágenes, copiar la carpeta que est
 # images_dir = '/content/gdrive/My Drive/Imagenes_buffer'
 # filenames = get_filepaths(images_dir)
 
-path = os.getcwd()
-files = os.listdir(path)
-filenames = [f for f in files if (f[-3:] == 'png') | (f[-3:] == 'jpg')]
-filenames.sort()
-img_files = []
-for i in range(len(filenames)):
-    img_files.append(img.imread(filenames[i]))
+# path = os.getcwd()
+# files = os.listdir(path)
+# filenames = [f for f in files if (f[-3:] == 'png') | (f[-3:] == 'jpg')]
+# filenames.sort()
+# img_files = []
+# for i in range(len(filenames)):
+#     img_files.append(img.imread(filenames[i]))
 
-img_source = img_files[1]
-img_buffer = img_files[2]
+# img_source = img_files[1]
+# img_buffer = img_files[2]
 
-img_total_number = len(img_source)
-print(img_total_number)
+# img_total_number = len(img_source)
+# print(img_total_number)
 """# Funciones
 
 ## Inicializar curvas de Hilbert
@@ -458,8 +458,8 @@ def outline(img_bn, img_source, widen_n = 4, color = 1):
 """
 
 if 'img_source' not in globals():
-    #img_source = [img_acumar]
-    #img_buffer = [img_buffer_acumar]
+    img_source = [img_acumar]
+    img_buffer = [img_buffer_acumar]
     img_number = 0
 else:
     img_number = 0 # cambiando este número se elige otra imagen
@@ -545,7 +545,7 @@ kernel_size = 32
 entropy_thr = 7 # bajar para detectar más basura
 entropy_gabor_thr = 4.8 # bajar para detectar más basura
 entropy_edge_thr = 0.9 # bajar para detectar más basura
-mean_edge_thr = 0.7 # subir para detectar más basura
+mean_edge_thr = 0.9 # subir para detectar más basura
 
 # imágenes transformadas
 img_source_entropy_tr_bn, img_source_entropy_tr_g = entropy_transform(img_source_g, img_buffer_bn, kernel_size, entropy_thr, True)
@@ -648,6 +648,7 @@ plt.xticks([])
 plt.yticks([])
 plt.grid(False)
 plt.box(False)
+plt.show()
 
 """## Cálculo de la superficie"""
 

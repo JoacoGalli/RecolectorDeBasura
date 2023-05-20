@@ -10,8 +10,8 @@ from skimage.color import rgba2rgb, rgb2gray
 from skimage.filters import gabor_kernel
 
 
-img_camara = img.imread('basura_000.png') # esta va a ser la foto que vamos a ir sacando con la camara
-img_buffer = img.imread('buffer_000.png')
+img_camara = img.imread('../fotos_buffer/buffer_2/buffer_2_colores_azul.png') # esta va a ser la foto que vamos a ir sacando con la camara
+img_buffer = img.imread('../fotos_buffer/buffer_2/buffer_2_negro.png')
 
 img_total_number = len(img_camara)
 
@@ -111,14 +111,14 @@ img_edge_mean_outline = outline(img_edge_mean_tr_bn, img_camara)
 
 # Impresión la dejo comentada pero no la vamos a necesitar
 
-# plt.figure(2)
-# plt.subplot(1, 3, 1)
-# plt.imshow(img_edge_bn[index_img[0]:index_img[1], index_img[2]:index_img[3]], cmap ='gray', vmin = 0, vmax = 1) #index_img #img_edge_mean_tr_bn #img_edge_mean_outline
-# plt.xticks([])
-# plt.yticks([])
-# plt.grid(False)
-# plt.box(False)
-# plt.show()
+plt.figure(2)
+plt.subplot(1, 3, 1)
+plt.imshow(img_edge_bn[index_img[0]:index_img[1], index_img[2]:index_img[3]], cmap ='gray', vmin = 0, vmax = 1) #index_img #img_edge_mean_tr_bn #img_edge_mean_outline
+plt.xticks([])
+plt.yticks([])
+plt.grid(False)
+plt.box(False)
+plt.show()
 
 filling_percentage = np.sum(img_buffer_bn* img_edge_mean_tr_bn)/np.sum(img_buffer_bn)*100
 
