@@ -8,7 +8,8 @@ from new_buffer import buffer_porcentaje
 #from sensores import medir_si_esta_ponton, medir_ubicacion_cinta, mover_cinta_traslacion, medir_buffer, activar_motores_rotacion, reset_motores_rotacion
 
 class Maquina_del_mal():
-    def __init__(self):
+    def __init__(self, mqtt_client):
+        self.mqtt_client = mqtt_client
         self.ponton = False
         self.cant_tachos = 8
         self.contenedores = {"0":0,"1":0,"2":0,"3":0,"4":90,"5":90,"6":90,"7":90}
@@ -46,6 +47,7 @@ class Maquina_del_mal():
         
     def esta_ponton(self):
         self.ponton = self.medir_si_esta_ponton()
+        self.mqtt_client.send_metric("metricas/ponton",self.ponton)
         return self.ponton
         
     def ubicacion_cinta(self): # existen cuatro ubicaciones
@@ -66,16 +68,21 @@ class Maquina_del_mal():
             self.posicion_cinta = 3
         else:
             print( "Fuera de rango")
+        self.mqtt_client.send_metric("metricas/distribucion_pos",self.posicion_cinta)
+        self.mqtt_client.send_metric("metricas/distribucion_pos_cm",self.posicion_cinta_cm)
 
     def medir_llenado_tachos(self, sensor):
         if sensor == 1:
             self.contenedores[str(self.posicion_cinta)] = self.medir_llenado(sensor) # cuando tenga los 2 sensores, hay que especificar cual usar
+            topic = "metricas/tacho" + str(self.posicion_cinta)
+            self.mqtt_client.send_metric(topic, self.contenedores[str(self.posicion_cinta)])
         if sensor == 2:
             pass
             #self.contenedores[str(self.posicion_cinta + 4)] = self.medir_llenado(sensor,2)
+            #topic = "metricas/tacho" + str(self.posicion_cinta + 4)
+            #self.mqtt_client.send_metric(topic, self.contenedores[str(self.posicion_cinta)])
 
     def medir_si_esta_ponton(self):
-        print("Estamos listos para arrancar a medir")
         ti = time.time()
         tf = time.time()
         while(tf - ti < 1):
@@ -120,18 +127,17 @@ class Maquina_del_mal():
             return distancia
     
     def medir_llenado(self, sensor):
-        trigger = self.trigger_tacho_1
-        echo = self.echo_tacho_1
-        #if sensor == 1:
-        #        trigger = self.trigger_tacho_1
-        #        echo = self.echo_tacho_1
-        #elif sensor == 2:
-        #    trigger = self.trigger_tacho_1
-        #   echo = self.echo_tacho_1
-        #else:
-        #    trigger =None
-        #    echo = None
-        #    print("No voy a medir nada")
+        trigger =None
+        echo = None
+
+        if sensor == 1:
+            trigger = self.trigger_tacho_1
+            echo = self.echo_tacho_1
+        elif sensor == 2:
+            trigger = self.trigger_tacho_1
+            echo = self.echo_tacho_1
+        else:
+            print("No voy a medir nada")
         
         list_dist = []
         for x in range(5):    
@@ -183,8 +189,9 @@ class Maquina_del_mal():
         
 class Motores_traslacion(threading.Thread):
     
-    def __init__(self):
+    def __init__(self, mqtt):
         threading.Thread.__init__(self)
+        self.mqtt_client = mqtt
         self.deamon = True
         self.motores_status = 'off' # on, off, reset
         self.sentido = None # "right" "left"
@@ -212,11 +219,13 @@ class Motores_traslacion(threading.Thread):
     def activar_motores_traslacion(self):
         while self.motores_status == 'on':
             time.sleep(0.01)
+            self.mqtt_client.send_metric("metricas/motor_traslacion", 1)
             self.motor_traslacion_nema.motor_go(self.clockwise, self.step_type, self.steps, self.step_delay, self.verbose, self.init_delay)
-
 
     def reset_motores_traslacion(self):
         self.motor_traslacion_nema.motor_stop()
+        self.mqtt_client.send_metric("metricas/motor_traslacion", 0)
+
         
 
     def fin(self):
@@ -227,15 +236,15 @@ class Motores_traslacion(threading.Thread):
             if self.motores_status == 'on':
                 self.activar_motores_traslacion()
             elif self.motores_status == 'off':
-                #print("se deberia apagar")
                 self.reset_motores_traslacion()
                 time.sleep(0.1)
             else:
                 pass
         
 class Motores_rotacion(threading.Thread):
-    def __init__(self):
+    def __init__(self, mqtt):
         threading.Thread.__init__(self)
+        self.mqtt_client = mqtt
         self.deamon = True
         self.motores_status = 'off' # on, off, reset
         self.sentido = None # "right" "left"
@@ -263,7 +272,8 @@ class Motores_rotacion(threading.Thread):
 
             print("rotando")
             GPIO.output(self.dir,1)
-            
+            self.mqtt_client.send_metric("metricas/motor_rotacion_cap", 1)
+            self.mqtt_client.send_metric("metricas/motor_rotacion_cap_vel", self.velocidad)
             while self.motores_status == "on":
                 time.sleep(0.01)
                 # Run for 200 steps. This will change based on how you set you controller
@@ -285,6 +295,8 @@ class Motores_rotacion(threading.Thread):
             if self.motores_status == 'on':
                 self.activar_motores_rotacion()
             elif self.motores_status == 'off':
+                self.mqtt_client.send_metric("metricas/motor_rotacion_cap", 0)
+                self.mqtt_client.send_metric("metricas/motor_rotacion_cap_vel", 0)
                 #print("se deberia apagar")
                 #self.reset_motores_traslacion()
                 time.sleep(0.1)

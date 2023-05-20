@@ -2,7 +2,8 @@ import time
 import logging
 
 from clases import Motores_rotacion, Motores_traslacion, Maquina_del_mal, Camara
-#from sensores import configurar_sensores
+import threading
+from .mqtt_influx_class import MQTTClient, InfluxDB_Client
 
 def elegir_tacho_a_llenar(contenedores: dict) -> int or False :
     print("Elijo que tacho quiero llenar")
@@ -48,15 +49,19 @@ def mover_cinta(maquina, traslacion, pos):
 
 if __name__ == "__main__":
     # Definimos las 3 clases (3 threads)
-    maquina = Maquina_del_mal()
-    motores_rotacion = Motores_rotacion()
-    traslacion = Motores_traslacion()
+    mqtt_client = MQTTClient()
+    mqtt_thread = threading.Thread(target=mqtt_client.run_mqtt_client)
+    mqtt_thread.start()
+    maquina = Maquina_del_mal(mqtt_client)
+    motores_rotacion = Motores_rotacion(mqtt_client)
+    traslacion = Motores_traslacion(mqtt_client)
     time.sleep(1)
     motores_rotacion.start()
     traslacion.start()
     camara = Camara()
     camara.start()
 
+    mqtt_client.send_metric("metricas/codigo", 1)
     while(True):
         if maquina.esta_ponton():
             maquina.ubicacion_cinta()
@@ -98,10 +103,12 @@ if __name__ == "__main__":
                 
             else:
                 """stop()"""
+                mqtt_client.send_metric("metricas/codigo", 0)
                 print("Los tachos estan llenos!!")
         else:
             """stop()"""
             print("No esta el ponton")
+            mqtt_client.send_metric("metricas/codigo", 0)
             break
 
 # Medir la bateria y mandarla al dashboard
