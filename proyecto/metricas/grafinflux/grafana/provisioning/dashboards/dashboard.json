@@ -998,7 +998,7 @@
                 "value": {
                   "legend": false,
                   "tooltip": false,
-                  "viz": true
+                  "viz": false
                 }
               }
             ]
@@ -1006,7 +1006,7 @@
         ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 12,
         "x": 0,
         "y": 15
@@ -1021,8 +1021,11 @@
           "placement": "right",
           "showLegend": true
         },
+        "timezone": [
+          "America/Argentina/Buenos_Aires"
+        ],
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -1036,7 +1039,7 @@
           "refId": "A"
         }
       ],
-      "title": "BUFFER",
+      "title": "Buffer",
       "type": "timeseries"
     },
     {
@@ -1069,7 +1072,7 @@
         "uid": "grafana"
       },
       "gridPos": {
-        "h": 2,
+        "h": 4,
         "w": 4,
         "x": 12,
         "y": 17
@@ -1094,9 +1097,33 @@
       },
       "gridPos": {
         "h": 2,
-        "w": 4,
+        "w": 8,
         "x": 16,
         "y": 17
+      },
+      "id": 32,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Rotacion</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 16,
+        "y": 19
       },
       "id": 38,
       "options": {
@@ -1120,7 +1147,7 @@
         "h": 2,
         "w": 4,
         "x": 20,
-        "y": 17
+        "y": 19
       },
       "id": 36,
       "options": {
@@ -1175,10 +1202,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 4,
         "x": 12,
-        "y": 19
+        "y": 21
       },
       "id": 30,
       "options": {
@@ -1208,30 +1235,6 @@
       ],
       "transformations": [],
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 8,
-        "x": 16,
-        "y": 19
-      },
-      "id": 32,
-      "options": {
-        "code": {
-          "language": "plaintext",
-          "showLineNumbers": false,
-          "showMiniMap": false
-        },
-        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Rotacion</h1>\n</div>",
-        "mode": "markdown"
-      },
-      "pluginVersion": "9.2.0",
-      "type": "text"
     },
     {
       "datasource": {
@@ -1306,7 +1309,7 @@
         ]
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 4,
         "x": 16,
         "y": 21
@@ -1417,7 +1420,7 @@
         ]
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 4,
         "x": 20,
         "y": 21
@@ -1478,7 +1481,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1494,7 +1498,7 @@
         "h": 3,
         "w": 3,
         "x": 11,
-        "y": 25
+        "y": 24
       },
       "id": 18,
       "options": {
@@ -1538,8 +1542,8 @@
     "list": []
   },
   "time": {
-    "from": "2023-05-21T01:37:10.874Z",
-    "to": "2023-05-21T01:37:11.060Z"
+    "from": "2023-05-21T01:37:10.146Z",
+    "to": "2023-05-21T01:37:12.031Z"
   },
   "timepicker": {
     "refresh_intervals": [
