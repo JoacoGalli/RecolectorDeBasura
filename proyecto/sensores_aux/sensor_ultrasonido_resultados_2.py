@@ -26,7 +26,7 @@ for archivo_mediciones in archivos_mediciones:
     mediana = np.median(distancias)
     diff = np.abs(distancias - mediana)
     mediana_absoluta = np.median(diff)
-    factor = 10  # Ajusta el factor según sea necesario
+    factor = 5  # Ajusta el factor según sea necesario
     umbral = factor * mediana_absoluta
     distancias_filtradas = [
         d for d in distancias if np.abs(d - mediana) <= umbral]
