@@ -146,7 +146,7 @@ class Maquina_del_mal():
             print("No voy a medir nada")
 
         list_dist = []
-        for x in range(30):
+        for x in range(10):
             # Ponemos en bajo el pin TRIG y después esperamos 0.5 seg para que el transductor se estabilice
             GPIO.output(trigger, GPIO.LOW)
             time.sleep(0.5)
@@ -193,7 +193,7 @@ class Maquina_del_mal():
             d for d in list_dist if np.abs(d - mediana) <= umbral]
         distancias_descartadas = [
             d for d in list_dist if np.abs(d - mediana) > umbral]
-        topic = "metricas/distancias_descartadas" + str(distancias_descartadas)
+        topic = "metricas/distancias_descartadas"
         self.mqtt_client.send_metric(
             topic, distancias_descartadas)
 
