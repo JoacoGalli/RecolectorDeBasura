@@ -41,9 +41,11 @@ for archivo_mediciones in archivos_mediciones:
 
     # Crear una lista de números de muestra para el eje x
     muestras = range(1, len(distancias_filtradas) + 1)
+    muestras2 = range(1, len(distancias) + 1)
 
     # Graficar las distancias
     plt.plot(muestras, distancias_filtradas, 'ro-', label='Mediciones')
+    plt.plot(muestras2, distancias, 'bo-', label='Distancias Originales')
     plt.scatter([len(distancias_filtradas) + i + 1 for i in range(len(distancias_descartadas))],
                 distancias_descartadas, color='gray', label='Descartadas')
     plt.xlabel('Muestra')
