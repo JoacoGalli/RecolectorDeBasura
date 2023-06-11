@@ -2,10 +2,11 @@
 import RPi.GPIO as GPIO
 import time
 
-TRIG = 23 #Variable que contiene el GPIO al cual conectamos la señal TRIG del sensor
-ECHO = 24 #Variable que contiene el GPIO al cual conectamos la señal ECHO del sensor
+TRIG = 16 #14 #16 7 #Variable que contiene el GPIO al cual conectamos la señal TRIG del sensor
+ECHO = 18 #15 #18 24 #Variable que contiene el GPIO al cual conectamos la señal ECHO del sensor
 sound_speed = 34300
 
+GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)     #Establecemos el modo según el cual nos refiriremos a los GPIO de nuestra RPi            
 GPIO.setup(TRIG, GPIO.OUT) #Configuramos el pin TRIG como una salida 
 GPIO.setup(ECHO, GPIO.IN)  #Configuramos el pin ECHO como una salida 
@@ -54,6 +55,7 @@ def sensar_tacho():
     # Reiniciamos todos los canales de GPIO.
     #GPIO.cleanup()
 if __name__ == "__main__":
+    #GPIO.cleanup()
     for x in range(50):
         distancia = sensar_tacho()
         print( "Distancia: %.2f cm" % distancia)
