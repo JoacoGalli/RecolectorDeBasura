@@ -32,7 +32,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "P5697886F9CA74929"
+        "uid": "BwDD30WVz"
       },
       "fieldConfig": {
         "defaults": {
@@ -70,6 +70,12 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 0,
+        "y": 0
+      },
       "id": 24,
       "options": {
         "colorMode": "background",
@@ -90,9 +96,9 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "P5697886F9CA74929"
+            "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> filter(fn: (r) => r[\"position\"] == \"status\")\n  |> sort()\n  |> yield(name: \"sort\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"codigo\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -102,64 +108,107 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "P5697886F9CA74929"
+        "uid": "BwDD30WVz"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-YlBl"
+            "mode": "thresholds"
           },
           "mappings": [],
-          "noValue": "Contenedores",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value distribucion_pos_cm"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "cm"
               },
               {
-                "color": "red",
-                "value": 80
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Distancia"
               }
             ]
           },
-          "unit": "short"
-        },
-        "overrides": []
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value distribucion_pos"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Contenedor actual"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
-        "w": 3,
-        "x": 11,
+        "w": 8,
+        "x": 8,
         "y": 0
       },
-      "id": 18,
+      "id": 26,
       "options": {
         "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "horizontal",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "vertical",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "text": {
+          "titleSize": 20,
+          "valueSize": 70
+        },
+        "textMode": "value_and_name"
       },
       "pluginVersion": "9.2.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "P5697886F9CA74929"
+            "uid": "BwDD30WVz"
           },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"distribucion_pos\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "hide": false,
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"distribucion_pos_cm\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "B"
         }
       ],
-      "transparent": true,
+      "title": "Posicion Cinta Distribucion",
       "type": "stat"
     },
     {
@@ -170,7 +219,7 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 19,
+        "x": 21,
         "y": 0
       },
       "id": 16,
@@ -185,6 +234,30 @@
       },
       "pluginVersion": "9.2.0",
       "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 40,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Contenedores</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
       "type": "text"
     },
     {
@@ -236,7 +309,7 @@
         "h": 5,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "id": 1,
       "links": [],
@@ -260,7 +333,88 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho0\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Nro 0",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "BwDD30WVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 5
+      },
+      "id": 11,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -315,11 +469,11 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 6,
-        "y": 3
+        "w": 5,
+        "x": 12,
+        "y": 5
       },
-      "id": 11,
+      "id": 10,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -341,7 +495,7 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_2\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho2\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -396,11 +550,11 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
-        "y": 3
+        "w": 5,
+        "x": 17,
+        "y": 5
       },
-      "id": 10,
+      "id": 9,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -422,7 +576,7 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_3\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho3\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -452,7 +606,7 @@
               "type": "special"
             }
           ],
-          "max": 100,
+          "max": 98,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -478,10 +632,10 @@
       "gridPos": {
         "h": 5,
         "w": 6,
-        "x": 18,
-        "y": 3
+        "x": 0,
+        "y": 10
       },
-      "id": 9,
+      "id": 2,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -503,7 +657,7 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_4\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho4\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -559,10 +713,10 @@
       "gridPos": {
         "h": 5,
         "w": 6,
-        "x": 0,
-        "y": 8
+        "x": 6,
+        "y": 10
       },
-      "id": 2,
+      "id": 13,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -584,7 +738,7 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_5\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho5\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -639,11 +793,11 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 6,
-        "y": 8
+        "w": 5,
+        "x": 12,
+        "y": 10
       },
-      "id": 13,
+      "id": 14,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -665,7 +819,7 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_6\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho6\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -720,90 +874,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
-        "y": 8
-      },
-      "id": 14,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "9.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "BwDD30WVz"
-          },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_7\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
-          "refId": "A"
-        }
-      ],
-      "title": "Nro 7",
-      "transparent": true,
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "BwDD30WVz"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "max": 98,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 65
-              },
-              {
-                "color": "red",
-                "value": 85
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 18,
-        "y": 8
+        "w": 5,
+        "x": 17,
+        "y": 10
       },
       "id": 12,
       "links": [],
@@ -827,11 +900,11 @@
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"contenedor_8\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"tacho7\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
-      "title": "Nro 8",
+      "title": "Nro 7",
       "transparent": true,
       "type": "gauge"
     },
@@ -843,37 +916,335 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "purple",
+            "mode": "thresholds",
+            "seriesBy": "max"
           },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
+            "axisGridShow": true,
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 35,
-            "gradientMode": "none",
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
             "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 19,
+            "lineStyle": {
+              "dash": [
+                10,
+                10
+              ],
+              "fill": "dash"
+            },
+            "lineWidth": 1,
+            "pointSize": 10,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "always",
             "spanNulls": false,
             "stacking": {
               "group": "A",
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "line"
             }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 70
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "value buffer"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "timezone": [
+          "America/Argentina/Buenos_Aires"
+        ],
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"buffer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "refId": "A"
+        }
+      ],
+      "title": "Buffer",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 28,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Motores</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 17
+      },
+      "id": 34,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Traslacion</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 17
+      },
+      "id": 32,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Rotacion</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 16,
+        "y": 19
+      },
+      "id": 38,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Distribucion</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 20,
+        "y": 19
+      },
+      "id": 36,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"text-align: center;\">\n<h1 style=\"color: gray;\">Captacion</h1>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.2.0",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "BwDD30WVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "OFF"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 12,
+        "y": 21
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_traslacion\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "BwDD30WVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -888,93 +1259,277 @@
                 "value": 80
               }
             ]
-          },
-          "unit": "percent"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value motor_rotacion_dist"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "OFF"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "ON"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value motor_rotacion_cap_vel"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Velocidad"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 14,
-        "x": 5,
-        "y": 13
+        "h": 3,
+        "w": 4,
+        "x": 16,
+        "y": 21
       },
-      "id": 20,
+      "id": 44,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "textMode": "auto"
       },
+      "pluginVersion": "9.2.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "BwDD30WVz"
           },
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"buffer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> sort()\n  |> yield(name: \"sort\")",
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_rotacion_dist\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "hide": false,
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_rotacion_cap_vel\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "B"
         }
       ],
-      "title": "BUFFER",
-      "type": "timeseries"
+      "type": "stat"
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
+        "type": "influxdb",
+        "uid": "BwDD30WVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "OFF"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value motor_rotacion_cap"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value motor_rotacion_cap_vel"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Velocidad"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
         "w": 4,
-        "x": 10,
+        "x": 20,
         "y": 21
       },
-      "id": 22,
+      "id": 42,
       "options": {
-        "bgColor": "#482c74",
-        "clockType": "24 hour",
-        "countdownSettings": {
-          "endCountdownTime": "2022-11-04T06:01:27-03:00",
-          "endText": "00:00:00"
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "countupSettings": {
-          "beginCountupTime": "2022-11-04T06:01:27-03:00",
-          "beginText": "00:00:00"
+        "text": {
+          "valueSize": 35
         },
-        "dateSettings": {
-          "dateFormat": "YYYY-MM-DD",
-          "fontSize": "20px",
-          "fontWeight": "normal",
-          "locale": "",
-          "showDate": false
-        },
-        "mode": "time",
-        "refresh": "sec",
-        "timeSettings": {
-          "fontSize": "50px",
-          "fontWeight": "normal"
-        },
-        "timezone": "America/Argentina/Buenos_Aires",
-        "timezoneSettings": {
-          "fontSize": "12px",
-          "fontWeight": "normal",
-          "showTimezone": false,
-          "zoneFormat": "offsetAbbv"
-        }
+        "textMode": "auto"
       },
-      "pluginVersion": "2.1.0",
-      "title": "Hora",
-      "type": "grafana-clock-panel"
+      "pluginVersion": "9.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_rotacion_cap\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "hide": false,
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_rotacion_cap_vel\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P5697886F9CA74929"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlBl"
+          },
+          "mappings": [],
+          "noValue": "Contenedores",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 11,
+        "y": 24
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P5697886F9CA74929"
+          },
+          "refId": "A"
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
     }
   ],
-  "refresh": "1m",
+  "refresh": false,
   "schemaVersion": 37,
   "style": "dark",
   "tags": [
@@ -987,8 +1542,8 @@
     "list": []
   },
   "time": {
-    "from": "now-30d",
-    "to": "now"
+    "from": "2023-05-21T01:37:10.146Z",
+    "to": "2023-05-21T01:37:12.031Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -1018,6 +1573,6 @@
   "timezone": "",
   "title": "Feinstaubsensoren",
   "uid": "cDvq7s6kk",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
