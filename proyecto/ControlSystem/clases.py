@@ -50,7 +50,11 @@ class Maquina_del_mal():
 
     def esta_ponton(self):
         self.ponton = self.medir_si_esta_ponton()
-        self.mqtt_client.send_metric("metricas/ponton", self.ponton)
+        if self.ponton:
+            value = 1
+        else:
+            value = 0
+        self.mqtt_client.send_metric("metricas/ponton", value)
         return self.ponton
 
     def ubicacion_cinta(self):  
@@ -174,7 +178,6 @@ class Maquina_del_mal():
 
             # Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
             distancia = (self.sound_speed * duracion) / 2
-<<<<<<< HEAD
             return distancia
     
     def medir_llenado(self, sensor):
@@ -275,10 +278,11 @@ class Motores_traslacion(threading.Thread):
         self.clockwise = False
         self.step_type = "Full"
         self.steps = 100
-        self.step_delay = 0.005
+        self.velocidades = [0.01, 0.009, 0.008, 0.007]
+        self.velocidad = 0
         self.verbose = False
         self.init_delay = 0.01
-
+        self.metricas = "metricas/motor_traslacion"
         self.mode_pin = (-1, -1, -1)
         self.motor_traslacion_nema = motor.A4988Nema(
             self.direcction, self.step, self.mode_pin, "A4988")
@@ -286,23 +290,29 @@ class Motores_traslacion(threading.Thread):
     def activar_motores_traslacion(self):
         while self.motores_status == 'on':
             time.sleep(0.01)
-            self.mqtt_client.send_metric("metricas/motor_traslacion", 1)
+            self.mqtt_client.send_metric(self.metricas, 1)
+            self.mqtt_client.send_metric(self.metricas+"_vel", self.velocidad)
             self.motor_traslacion_nema.motor_go(
-                self.clockwise, self.step_type, self.steps, self.step_delay, self.verbose, self.init_delay)
+                self.clockwise, self.step_type, self.steps, self.velocidades[self.velocidad], self.verbose, self.init_delay)
 
     def reset_motores_traslacion(self):
         self.motor_traslacion_nema.motor_stop()
-        self.mqtt_client.send_metric("metricas/motor_traslacion", 0)
 
     def fin(self):
         self.stop_event.set()
 
     def run(self):
+        cont = 0
         while not self.stop_event.is_set():
             if self.motores_status == 'on':
+                cont = 0
                 self.activar_motores_traslacion()
             elif self.motores_status == 'off':
-                self.reset_motores_traslacion()
+                if cont == 0:
+                    self.reset_motores_traslacion()
+                    self.mqtt_client.send_metric(self.metricas, 0)
+                    self.mqtt_client.send_metric(self.metricas + "_vel",self.velocidad)
+                cont += 1
                 time.sleep(0.1)
             else:
                 pass
@@ -315,12 +325,12 @@ class Motores_rotacion(threading.Thread):
         self.deamon = True
         self.motores_status = 'off' # on, off, reset
         self.sentido = 0 #en 1 por que solo nos interesa que gire en ese sentido #None # "right" "left"
-        self.config()
         self.stop_event = threading.Event()
         self.velocidades = [0.01, 0.009, 0.008, 0.007]
         self.velocidad = 0
         self.tipo = tipo
         self.metricas = "metricas/"
+        self.config()
 
     def config(self):
         if self.tipo == "dist":
@@ -328,7 +338,7 @@ class Motores_rotacion(threading.Thread):
             self.step = 6 
             self.velocidad = 0
             self.metricas += "motor_rotacion_dist"
-        elif slef.tipo == "cap":
+        elif self.tipo == "cap":
             self.dir = 26 
             self.step = 19 
             self.velocidad = 0
@@ -350,7 +360,7 @@ class Motores_rotacion(threading.Thread):
             
         self.mqtt_client.send_metric(self.metricas, 1)
         self.mqtt_client.send_metric(
-            self.metricas + "_vel", self.velocidades[self.velocidad])
+            self.metricas + "_vel", self.velocidad)
         while self.motores_status == "on":
             # Run for 200 steps. This will change based on how you set you controller
             # Set one coil winding to high
@@ -372,10 +382,10 @@ class Motores_rotacion(threading.Thread):
                 cont = 0
                 self.activar_motores_rotacion()
             elif self.motores_status == 'off':
-                if cont == 0
+                if cont == 0:
                     print("envio las metricas de apagado 1 vez")
                     self.mqtt_client.send_metric(self.metricas, 0)
-                    self.mqtt_client.send_metric(self.metricas + "_vel", 0)
+                    self.mqtt_client.send_metric(self.metricas + "_vel", self.velocidad)
                 cont +=1
                 time.sleep(0.5)
             else:

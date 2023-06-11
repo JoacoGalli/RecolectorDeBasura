@@ -1,36 +1,19 @@
 import time
 import logging
 
-from clases import Motores_rotacion_cap, Motores_rotacion_dist, Motores_traslacion, Maquina_del_mal, Camara
+from clases import Motores_rotacion, Motores_traslacion, Maquina_del_mal, Camara
 import threading
-from .mqtt_influx_class import MQTTClient, InfluxDB_Client
+from mqtt_influx_class import MQTTClient
 
-def elegir_tacho(contenedores: dict) -> int or False :
-    print("Elijo que tacho quiero llenar")
-    aux = []
-    clockwise = None
-    for contenedor in range(len(contenedores)):
-        aux.append(contenedores[str(contenedor)])
-    #print("f{aux=}")
-    posible_opcion =aux.index(min(aux))
-    if posible_opcion <= 4:
-        clockwise = 0
-        sensor = 1 #cercano al sensor distancia
-    else:
-        clockwise = 1
-        sensor = 2 # cercano al sensor captacion
-    if contenedores[str(posible_opcion)] > 95:
-        posible_opcion = False
-
-    return posible_opcion, clockwise, sensor
 
 ORDEN_LLENADO = [3,7,2,6,1,5,0,4]
+
 def elegir_tacho_a_llenar(cont):
     aux = []
     clockwise = None
     sensor = None
     for x in range(len(cont)):
-        if cont[str(ORDEN_LLENADO[x])] < 90:
+        if cont[str(ORDEN_LLENADO[x])] < 90: # Este 90 tiene que coincidir con el que hace prender los motores en el main
             if ORDEN_LLENADO[x] in [0,1,2,3]:
                 clockwise = 0
                 sensor = 1
@@ -76,8 +59,8 @@ if __name__ == "__main__":
     mqtt_thread = threading.Thread(target=mqtt_client.run_mqtt_client)
     mqtt_thread.start()
     maquina = Maquina_del_mal(mqtt_client)
-    motor_rotacion_dist = Motores_rotacion_dist(mqtt_client)
-    motor_rotacion_cap = Motores_rotacion_cap(mqtt_client)
+    motor_rotacion_dist = Motores_rotacion(mqtt_client,tipo="dist")
+    motor_rotacion_cap = Motores_rotacion(mqtt_client, tipo="cap")
     traslacion = Motores_traslacion(mqtt_client)
     time.sleep(1)
     motor_rotacion_dist.start()
@@ -110,7 +93,7 @@ if __name__ == "__main__":
                     while camara.buffer > 20:
                         print("pase el buffer")
                         print(f"{maquina.contenedores=}")
-                        while maquina.contenedores[str(maquina.posicion_cinta)] < 60:
+                        while maquina.contenedores[str(maquina.posicion_cinta)] < 90:  # este 90 tiene que coincidir con el de elegir_tacho_a_llenar()
                             print("prendeme los motores")
                             motor_rotacion_dist.motores_status = "on"
                             time.sleep(0.2)
