@@ -14,33 +14,34 @@ class Maquina_del_mal():
         self.mqtt_client = mqtt_client
         self.ponton = False
         self.cant_tachos = 8
-        self.contenedores = {"0": 0, "1": 0, "2": 0,
-                             "3": 0, "4": 90, "5": 90, "6": 90, "7": 90}
+        self.contenedores = {"0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0}
         self.buffer = None
-        self.posicion_cinta = None  # 1 2 3 4
+        self.posicion_cinta = None # 1 2 3 4        
         self.posicion_cinta_cm = 0
-        self.posicion_media = {"0": 7, "1": 23, "2": 39, "3": 55}
+        self.sensor = 0
+        self.posicion_media = { "0": 9, "1": 22, "2": 36, "3": 48} 
         self.set_maquina()
 
     def set_maquina(self):
         # ultrasonido ubicacion cinta
         GPIO.setmode(GPIO.BCM)
-        self.trigger_ubi = 14
-        self.echo_ubi = 15
+        self.trigger_ubi = 7
+        self.echo_ubi = 24
         GPIO.setup(self.trigger_ubi, GPIO.OUT)
         GPIO.setup(self.echo_ubi, GPIO.IN)
-
-        # ultrasonido llenado delantero
-        self.trigger_tacho_1 = 16
-        self.echo_tacho_1 = 18
+        
+        # ultrasonido llenado delantero 
+        self.trigger_tacho_1 = 14        
+        self.echo_tacho_1 = 15
         GPIO.setup(self.trigger_tacho_1, GPIO.OUT)
         GPIO.setup(self.echo_tacho_1, GPIO.IN)
 
         # ultrasonido llenado trasero
-        # self.trigger_tacho_2 = 7
-        # self.echo_tacho_2 = 24
-        # GPIO.setup(self.trigger_tacho_2, GPIO.OUT)
-        # GPIO.setup(self.echo_tacho_2, GPIO.IN)
+        self.trigger_tacho_2 = 16
+        self.echo_tacho_2 = 18
+        GPIO.setup(self.trigger_tacho_2, GPIO.OUT)
+        GPIO.setup(self.echo_tacho_2, GPIO.IN)
+        
         self.sound_speed = 34300
 
         # IR
@@ -52,24 +53,20 @@ class Maquina_del_mal():
         self.mqtt_client.send_metric("metricas/ponton", self.ponton)
         return self.ponton
 
-    def ubicacion_cinta(self):  # existen cuatro ubicaciones
-        # esto lo deberiamos rechequear
+    def ubicacion_cinta(self):  
         self.posicion_cinta_cm = self.medir_ubicacion_cinta()
-        # print(f"Distancia: {self.posicion_cinta_cm} cm")
-        if 0 < self.posicion_cinta_cm < 15:
-            # print(0)
+        
+        if 0 < self.posicion_cinta_cm < 13:
             self.posicion_cinta = 0
-        elif 15 < self.posicion_cinta_cm < 31:
-            # print(1)
+        elif 13 < self.posicion_cinta_cm < 30:
             self.posicion_cinta = 1
-        elif 31 < self.posicion_cinta_cm < 47:
-            # print(2)
+        elif  30 < self.posicion_cinta_cm < 43:
             self.posicion_cinta = 2
-        elif 47 < self.posicion_cinta_cm < 63:
-            # print(3)
+        elif  43 < self.posicion_cinta_cm < 49:
             self.posicion_cinta = 3
         else:
             print("Fuera de rango")
+        
         self.mqtt_client.send_metric(
             "metricas/distribucion_pos", self.posicion_cinta)
         self.mqtt_client.send_metric(
@@ -83,10 +80,9 @@ class Maquina_del_mal():
             self.mqtt_client.send_metric(
                 topic, self.contenedores[str(self.posicion_cinta)])
         if sensor == 2:
-            pass
-            # self.contenedores[str(self.posicion_cinta + 4)] = self.medir_llenado(sensor,2)
-            # topic = "metricas/tacho" + str(self.posicion_cinta + 4)
-            # self.mqtt_client.send_metric(topic, self.contenedores[str(self.posicion_cinta)])
+            self.contenedores[str(self.posicion_cinta + 4)] = self.medir_llenado(sensor)
+            topic = "metricas/tacho" + str(self.posicion_cinta + 4)
+            self.mqtt_client.send_metric(topic, self.contenedores[str(self.posicion_cinta)])
 
     def medir_si_esta_ponton(self):
         ti = time.time()
@@ -146,7 +142,7 @@ class Maquina_del_mal():
             print("No voy a medir nada")
 
         list_dist = []
-        for x in range(10):
+        for x in range(5):
             # Ponemos en bajo el pin TRIG y después esperamos 0.5 seg para que el transductor se estabilice
             GPIO.output(trigger, GPIO.LOW)
             time.sleep(0.5)
@@ -178,11 +174,68 @@ class Maquina_del_mal():
 
             # Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
             distancia = (self.sound_speed * duracion) / 2
+<<<<<<< HEAD
+            return distancia
+    
+    def medir_llenado(self, sensor):
+        #trigger = self.trigger_tacho_1
+        #echo = self.echo_tacho_1
+        if sensor == 2:
+                trigger = self.trigger_tacho_2
+                echo = self.echo_tacho_2
+                distancia_vacio = 13
+                distancia_lleno = 2
+        elif sensor == 1:
+                trigger = self.trigger_tacho_1
+                echo = self.echo_tacho_1
+                distancia_vacio = 11
+                distancia_lleno = 1.5
+        else:
+                trigger =None
+                echo = None
+                print("No voy a medir nada")
+        
+        list_dist = []
+        for x in range(10):    
+                # Ponemos en bajo el pin TRIG y después esperamos 0.5 seg para que el transductor se estabilice
+                GPIO.output(trigger, GPIO.LOW)
+                time.sleep(0.5)
 
-            # % llenado
-            # hay que redefinir esto tambien ------------------------
-            list_dist.append(distancia)
+                #Ponemos en alto el pin TRIG esperamos 10 uS antes de ponerlo en bajo
+                GPIO.output(trigger, GPIO.HIGH)
+                time.sleep(0.00001)
+                GPIO.output(trigger, GPIO.LOW)
 
+                # En este momento el sensor envía 8 pulsos ultrasónicos de 40kHz y coloca su pin ECHO en alto
+                # Debemos detectar dicho evento para iniciar la medición del tiempo
+                
+                while True:
+                    pulso_inicio = time.time()
+                    if GPIO.input(echo) == GPIO.HIGH:
+                        break
+
+                # El pin ECHO se mantendrá en HIGH hasta recibir el eco rebotado por el obstáculo. 
+                # En ese momento el sensor pondrá el pin ECHO en bajo.
+                # Prodedemos a detectar dicho evento para terminar la medición del tiempo
+                
+                while True:
+                    pulso_fin = time.time()
+                    if GPIO.input(echo) == GPIO.LOW:
+                        break
+
+                # Tiempo medido en segundos
+                duracion = pulso_fin - pulso_inicio
+
+                #Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
+                distancia = (self.sound_speed * duracion) / 2
+                
+                # % llenado
+                # hay que redefinir esto tambien ------------------------
+                if distancia > distancia_vacio:
+                        pass
+                else:
+                        list_dist.append(distancia)
+        
         # Descartar mediciones que difieren significativamente de la mediana
         mediana = np.median(list_dist)
         diff = np.abs(list_dist - mediana)
@@ -197,11 +250,6 @@ class Maquina_del_mal():
         self.mqtt_client.send_metric(
             topic, distancias_descartadas)
 
-        # print(f"{list_dist=}")
-        # dist_mean = mean(list_dist)
-        distancia_vacio = 18.2
-        distancia_lleno = 11
-        print(f"{distancias_filtradas=}")
         porcentaje = (distancia_vacio - distancias_filtradas) * 100 / \
             (distancia_vacio - distancia_lleno)
 
@@ -214,8 +262,7 @@ class Motores_traslacion(threading.Thread):
         threading.Thread.__init__(self)
         self.mqtt_client = mqtt
         self.deamon = True
-        self.motores_status = 'off'  # on, off, reset
-        self.sentido = None  # "right" "left"
+        self.motores_status = 'off' # on, off, reset
         self.config()
         self.stop_event = threading.Event()
 
@@ -225,7 +272,7 @@ class Motores_traslacion(threading.Thread):
         self.step = 27
         self.cw = 1
         self.ccw = 0
-        self.clockwise = True
+        self.clockwise = False
         self.step_type = "Full"
         self.steps = 100
         self.step_delay = 0.005
@@ -262,21 +309,32 @@ class Motores_traslacion(threading.Thread):
 
 
 class Motores_rotacion(threading.Thread):
-    def __init__(self, mqtt):
+    def __init__(self, mqtt, tipo):
         threading.Thread.__init__(self)
         self.mqtt_client = mqtt
         self.deamon = True
-        self.motores_status = 'off'  # on, off, reset
-        self.sentido = None  # "right" "left"
+        self.motores_status = 'off' # on, off, reset
+        self.sentido = 0 #en 1 por que solo nos interesa que gire en ese sentido #None # "right" "left"
         self.config()
         self.stop_event = threading.Event()
+        self.velocidades = [0.01, 0.009, 0.008, 0.007]
+        self.velocidad = 0
+        self.tipo = tipo
+        self.metricas = "metricas/"
 
     def config(self):
-        # ver si los definimos a los 2 iguales
-        self.dir = 26
-        self.step = 19
-        self.velocidad = .01
-
+        if self.tipo == "dist":
+            self.dir = 5 
+            self.step = 6 
+            self.velocidad = 0
+            self.metricas += "motor_rotacion_dist"
+        elif slef.tipo == "cap":
+            self.dir = 26 
+            self.step = 19 
+            self.velocidad = 0
+            self.metricas += "motor_rotacion_cap"
+        else:
+            print("No hay ningun motor para setear.")
         # Setup pin layout on PI
         GPIO.setmode(GPIO.BCM)
 
@@ -285,57 +343,54 @@ class Motores_rotacion(threading.Thread):
         GPIO.setup(self.step, GPIO.OUT)
 
         # Set the first direction you want it to spin
-        GPIO.output(self.dir, 1)
+        #GPIO.output(self.dir, self.sentido)
 
     def activar_motores_rotacion(self):
-
-        print("rotando")
-        GPIO.output(self.dir, 1)
-        self.mqtt_client.send_metric("metricas/motor_rotacion_cap", 1)
+        GPIO.output(self.dir,self.sentido)
+            
+        self.mqtt_client.send_metric(self.metricas, 1)
         self.mqtt_client.send_metric(
-            "metricas/motor_rotacion_cap_vel", self.velocidad)
+            self.metricas + "_vel", self.velocidades[self.velocidad])
         while self.motores_status == "on":
-            time.sleep(0.01)
             # Run for 200 steps. This will change based on how you set you controller
-            for x in range(200):
-
-                # Set one coil winding to high
-                GPIO.output(self.step, GPIO.HIGH)
-                # Allow it to get there.
-                # Dictates how fast stepper motor will run
-                time.sleep(self.velocidad)
-                # Set coil winding to low
-                GPIO.output(self.step, GPIO.LOW)
-                # Dictates how fast stepper motor will run
-                time.sleep(self.velocidad)
-                # finish_time = time.time()
-
+            # Set one coil winding to high
+            GPIO.output(self.step,GPIO.HIGH)
+            # Allow it to get there.
+            time.sleep(self.velocidades[self.velocidad]) # Dictates how fast stepper motor will run
+            # Set coil winding to low
+            GPIO.output(self.step,GPIO.LOW)
+            time.sleep(self.velocidades[self.velocidad]) # Dictates how fast stepper motor will run
+    
     def fin(self):
+        GPIO.cleanup()
         self.stop_event.set()
-
+    
     def run(self):
+        cont = 0
         while not self.stop_event.is_set():
             if self.motores_status == 'on':
+                cont = 0
                 self.activar_motores_rotacion()
             elif self.motores_status == 'off':
-                self.mqtt_client.send_metric("metricas/motor_rotacion_cap", 0)
-                self.mqtt_client.send_metric(
-                    "metricas/motor_rotacion_cap_vel", 0)
-                # print("se deberia apagar")
-                # self.reset_motores_traslacion()
-                time.sleep(0.1)
+                if cont == 0
+                    print("envio las metricas de apagado 1 vez")
+                    self.mqtt_client.send_metric(self.metricas, 0)
+                    self.mqtt_client.send_metric(self.metricas + "_vel", 0)
+                cont +=1
+                time.sleep(0.5)
             else:
-                pass
-
-
+                pass         
+                
+                
 class Camara(threading.Thread):
     def __init__(self):
         super().__init__()
         self.daemon = True
-        self.buffer = None
-
+        self.buffer = 0
+    
     def run(self):
         names = ["tapas_multicolor.jpg", "tapas_rojas.jpg"]
         for n in names:
             self.buffer = buffer_porcentaje(n)
-            time.sleep(60)  # 60 segundos?
+            time.sleep(60)
+
