@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: ImgProcess
+Version: 1.0
+Summary: Funciones para procesar los buffers
+Home-page: UNKNOWN
+Author: nacho
+License: UNKNOWN
+Platform: UNKNOWN
+Requires: numpy
+Requires: scipy.ndimage
+
+UNKNOWN
+

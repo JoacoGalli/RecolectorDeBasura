@@ -1172,7 +1172,23 @@
           "color": {
             "mode": "palette-classic"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "OFF"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1183,52 +1199,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value motor_traslacion"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "0": {
-                        "color": "red",
-                        "index": 0,
-                        "text": "OFF"
-                      },
-                      "1": {
-                        "color": "green",
-                        "index": 1,
-                        "text": "ON"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value motor_traslacion_vel"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Speed"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 3,
@@ -1239,7 +1210,7 @@
       "id": 30,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -1249,7 +1220,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "pluginVersion": "9.2.0",
       "targets": [
@@ -1260,15 +1231,6 @@
           },
           "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_traslacion\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "BwDD30WVz"
-          },
-          "hide": false,
-          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"motor_traslacion_vel\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
-          "refId": "B"
         }
       ],
       "transformations": [],
@@ -1341,12 +1303,6 @@
               {
                 "id": "displayName",
                 "value": "Velocidad"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "palette-classic"
-                }
               }
             ]
           }
@@ -1405,7 +1361,23 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "OFF"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "ON"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1430,26 +1402,6 @@
               {
                 "id": "displayName",
                 "value": "Status"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "0": {
-                        "color": "red",
-                        "index": 1,
-                        "text": "OFF"
-                      },
-                      "1": {
-                        "color": "green",
-                        "index": 0,
-                        "text": "ON"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
               }
             ]
           },
@@ -1462,12 +1414,6 @@
               {
                 "id": "displayName",
                 "value": "Velocidad"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "palette-classic"
-                }
               }
             ]
           }
@@ -1493,7 +1439,7 @@
           "values": false
         },
         "text": {
-          "valueSize": 50
+          "valueSize": 35
         },
         "textMode": "auto"
       },
@@ -1583,7 +1529,7 @@
       "type": "stat"
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 37,
   "style": "dark",
   "tags": [
@@ -1596,8 +1542,8 @@
     "list": []
   },
   "time": {
-    "from": "now-5m",
-    "to": "now"
+    "from": "2023-05-21T01:37:10.146Z",
+    "to": "2023-05-21T01:37:12.031Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -1625,8 +1571,8 @@
     ]
   },
   "timezone": "",
-  "title": "Metricas GIDIS",
+  "title": "Feinstaubsensoren",
   "uid": "cDvq7s6kk",
-  "version": 4,
+  "version": 2,
   "weekStart": ""
 }

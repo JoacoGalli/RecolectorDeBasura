@@ -19,7 +19,7 @@ class Maquina_del_mal():
         self.posicion_cinta = None # 1 2 3 4        
         self.posicion_cinta_cm = 0
         self.sensor = 0
-        self.posicion_media = { "0": 9, "1": 22, "2": 36, "3": 48} 
+        self.posicion_media = { "0": 7.5, "1": 25.5, "2": 42, "3":50 , "4": 7, "5": 20 , "6": 36 ,"7": 49} 
         self.set_maquina()
 
     def set_maquina(self):
@@ -30,17 +30,17 @@ class Maquina_del_mal():
         GPIO.setup(self.trigger_ubi, GPIO.OUT)
         GPIO.setup(self.echo_ubi, GPIO.IN)
         
-        # ultrasonido llenado delantero 
-        self.trigger_tacho_1 = 14        
-        self.echo_tacho_1 = 15
-        GPIO.setup(self.trigger_tacho_1, GPIO.OUT)
-        GPIO.setup(self.echo_tacho_1, GPIO.IN)
-
-        # ultrasonido llenado trasero
-        self.trigger_tacho_2 = 16
-        self.echo_tacho_2 = 18
+        # ultrasonido llenado trasero 
+        self.trigger_tacho_2 = 14        
+        self.echo_tacho_2 = 15
         GPIO.setup(self.trigger_tacho_2, GPIO.OUT)
         GPIO.setup(self.echo_tacho_2, GPIO.IN)
+
+        # ultrasonido llenado delantero
+        self.trigger_tacho_1 = 16
+        self.echo_tacho_1 = 18
+        GPIO.setup(self.trigger_tacho_1, GPIO.OUT)
+        GPIO.setup(self.echo_tacho_1, GPIO.IN)
         
         self.sound_speed = 34300
 
@@ -66,7 +66,7 @@ class Maquina_del_mal():
             self.posicion_cinta = 1
         elif  30 < self.posicion_cinta_cm < 43:
             self.posicion_cinta = 2
-        elif  43 < self.posicion_cinta_cm < 49:
+        elif  43 < self.posicion_cinta_cm < 51:
             self.posicion_cinta = 3
         else:
             print("Fuera de rango")
@@ -76,17 +76,18 @@ class Maquina_del_mal():
         self.mqtt_client.send_metric(
             "metricas/distribucion_pos_cm", self.posicion_cinta_cm)
 
-    def medir_llenado_tachos(self, sensor):
+    def medir_llenado_tachos(self, sensor, tacho):
         if sensor == 1:
-            self.contenedores[str(self.posicion_cinta)] = self.medir_llenado(
+            self.contenedores[str(tacho)] = self.medir_llenado(
                 sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
-            topic = "metricas/tacho" + str(self.posicion_cinta)
+            topic = "metricas/tacho" + str(tacho)
             self.mqtt_client.send_metric(
-                topic, self.contenedores[str(self.posicion_cinta)])
+                topic, self.contenedores[str(tacho)])
+            print(self.contenedores[str(tacho)])
         if sensor == 2:
-            self.contenedores[str(self.posicion_cinta + 4)] = self.medir_llenado(sensor)
-            topic = "metricas/tacho" + str(self.posicion_cinta + 4)
-            self.mqtt_client.send_metric(topic, self.contenedores[str(self.posicion_cinta)])
+            self.contenedores[str(tacho)] = self.medir_llenado(sensor)
+            topic = "metricas/tacho" + str(tacho)
+            self.mqtt_client.send_metric(topic, self.contenedores[str(tacho)])
 
     def medir_si_esta_ponton(self):
         ti = time.time()
@@ -130,9 +131,10 @@ class Maquina_del_mal():
 
         # Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
         distancia = (self.sound_speed * duracion) / 2
+        print(f"{distancia}")
         return distancia
 
-    def medir_llenado(self, sensor):
+    def medir_llenado_2(self, sensor):
         trigger = None
         echo = None
 
@@ -186,13 +188,13 @@ class Maquina_del_mal():
         if sensor == 2:
                 trigger = self.trigger_tacho_2
                 echo = self.echo_tacho_2
-                distancia_vacio = 13
-                distancia_lleno = 2
+                distancia_vacio = 10.5
+                distancia_lleno = 1.5
         elif sensor == 1:
                 trigger = self.trigger_tacho_1
                 echo = self.echo_tacho_1
-                distancia_vacio = 11
-                distancia_lleno = 1.5
+                distancia_vacio = 14
+                distancia_lleno = 2
         else:
                 trigger =None
                 echo = None
@@ -234,28 +236,35 @@ class Maquina_del_mal():
                 
                 # % llenado
                 # hay que redefinir esto tambien ------------------------
-                if distancia > distancia_vacio:
-                        pass
+                if distancia > distancia_vacio :
+                    pass
+                #elif distancia == 'nan':
+                #    pass
+                #elif type(distancia) != float:
+                #    pass
                 else:
-                        list_dist.append(distancia)
+                    list_dist.append(distancia)
         
         # Descartar mediciones que difieren significativamente de la mediana
-        mediana = np.median(list_dist)
-        diff = np.abs(list_dist - mediana)
-        mediana_absoluta = np.median(diff)
-        factor = 5  # Ajusta el factor según sea necesario
-        umbral = factor * mediana_absoluta
-        distancias_filtradas = [
-            d for d in list_dist if np.abs(d - mediana) <= umbral]
-        distancias_descartadas = [
-            d for d in list_dist if np.abs(d - mediana) > umbral]
-        topic = "metricas/distancias_descartadas"
-        self.mqtt_client.send_metric(
-            topic, distancias_descartadas)
-
+        #mediana = np.median(list_dist)
+        #diff = np.abs(list_dist - mediana)
+        #mediana_absoluta = np.median(diff)
+        #factor = 5  # Ajusta el factor según sea necesario
+        #umbral = factor * mediana_absoluta
+        #distancias_filtradas = [
+        #    d for d in list_dist if np.abs(d - mediana) <= umbral]
+        #distancias_descartadas = [
+        #    d for d in list_dist if np.abs(d - mediana) > umbral]
+        #topic = "metricas/distancias_descartadas"
+        #self.mqtt_client.send_metric(
+        #    topic, distancias_descartadas)
+        #distancias_filtradas = np.mean(distancias_filtradas)
+        #print(f'estas son las {distancias_filtradas=}')
+        distancias_filtradas = np.mean(list_dist)
         porcentaje = (distancia_vacio - distancias_filtradas) * 100 / \
             (distancia_vacio - distancia_lleno)
-
+        
+        print(f'estas son las {distancias_filtradas=}')
         return porcentaje
 
 
@@ -279,7 +288,7 @@ class Motores_traslacion(threading.Thread):
         self.step_type = "Full"
         self.steps = 100
         self.velocidades = [0.01, 0.009, 0.008, 0.007]
-        self.velocidad = 0
+        self.velocidad = 1
         self.verbose = False
         self.init_delay = 0.01
         self.metricas = "metricas/motor_traslacion"
@@ -342,6 +351,7 @@ class Motores_rotacion(threading.Thread):
             self.dir = 26 
             self.step = 19 
             self.velocidad = 0
+            self.sentido = 1
             self.metricas += "motor_rotacion_cap"
         else:
             print("No hay ningun motor para setear.")
@@ -393,14 +403,19 @@ class Motores_rotacion(threading.Thread):
                 
                 
 class Camara(threading.Thread):
-    def __init__(self):
+    def __init__(self, mqtt_client):
         super().__init__()
         self.daemon = True
         self.buffer = 0
-    
+        self.mqtt_client = mqtt_client
+        self.metricas = "/metricas/buffer" 
     def run(self):
+        
+        self.mqtt_client.send_metric(self.metricas, 80)
+        time.sleep(10)
         names = ["tapas_multicolor.jpg", "tapas_rojas.jpg"]
         for n in names:
             self.buffer = buffer_porcentaje(n)
+            self.mqtt_client.send_metric(self.metricas, self.buffer)
             time.sleep(60)
 

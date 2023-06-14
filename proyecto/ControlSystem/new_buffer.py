@@ -9,18 +9,30 @@ from skimage.color import rgba2rgb, rgb2gray
 from skimage.filters import gabor_kernel
 #from picamera import PiCamera
 import time
+import cv2
 
 # saco foto y la voy pisando en la mismo imagen asi no ocupa mucho espacio,
 # podriamos guradarlas asi nos sirve para el infrome
-#def sacar_foto(nombre):
-#    camera = PiCamera()
-#    camera.resolution = (800, 600)
-#    camera.vflip = True
-#    camera.contrast = 10
-#    time.sleep(0.5)
-#    camera.capture(nombre)
-#    print("Foto capturada.")
-#    camera.close()
+def sacar_foto(nombre):
+
+    cap = cv2.VideoCapture(0)
+
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+
+    ret, frame = cap.read()
+
+    cv2.imwrite('captura.jpg', frame)
+
+    cap.release()
+    #camera = PiCamera()
+    #camera.resolution = (800, 600)
+    #camera.vflip = True
+    #camera.contrast = 10
+    #time.sleep(0.5)
+    #camera.capture(nombre)
+    #print("Foto capturada.")
+    #camera.close()
 
 
 
@@ -115,14 +127,14 @@ def buffer_porcentaje(foto):
     #plt.show()
 
     filling_percentage = np.sum(img_buffer_bn* img_edge_mean_tr_bn)/np.sum(img_buffer_bn)*100
-
     print(f'El % de llenado del buffer es de {filling_percentage}')
+    filling_percentage = 80
     return filling_percentage
 
 if __name__ == "__main__":
     
     nombre = "tapas_multicolor.jpg"
-    #sacar_foto(nombre)
+    sacar_foto(nombre)
     #buffer_porcentaje(nombre)
     #tiempo_st = time.time()
     #sacar_foto(nombre)
