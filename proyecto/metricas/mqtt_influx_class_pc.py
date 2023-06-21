@@ -73,6 +73,10 @@ class MQTTClient(InfluxDB_Client):
             self.influxdb_client.send_sensor_data_to_influxdb(sensor_data)
 
     def run_mqtt_client(self):
-        #self.client.on_message = self.on_message
+        self.client.on_message = self.on_message
         self.client.subscribe("metricas/#")
         self.client.loop_forever()
+
+if __name__ == "__main__":
+    mqtt_client = MQTTClient()
+    mqtt_client.run_mqtt_client()
