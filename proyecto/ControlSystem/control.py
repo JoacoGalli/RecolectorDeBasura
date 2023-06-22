@@ -118,29 +118,32 @@ if __name__ == "__main__":
             #print(f"{maquina.contenedores=}")
             tacho_actual, motor_rotacion_dist.sentido, maquina.sensor = elegir_tacho_a_llenar(maquina.contenedores, maquina, traslacion, ORDEN_LLENADO) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
             #mover_cinta(maquina, traslacion, tacho_actual)
-            if camara.buffer > 70:
-                while camara.buffer > 20:
+            if camara.buffer > 70 and tacho_actual != None:
+                motor_rotacion_cap.motores_status = "on"
+                while camara.buffer > 20 and tacho_actual != None:
                     print("pase el buffer")
                     print(f"{maquina.contenedores=}")
                     time.sleep(1)
                     motor_rotacion_dist.motores_status = "on"
-                    motor_rotacion_cap.motores_status = "on"
+                    #motor_rotacion_cap.motores_status = "on"
                     while maquina.contenedores[str(tacho_actual)] < 50:  # este 90 tiene que coincidir con el de elegir_tacho_a_llenar()
                         maquina.medir_llenado_tachos(maquina.sensor,tacho_actual)
                         print(f"{maquina.contenedores=}")
                     motor_rotacion_dist.motores_status = "off"
-                    motor_rotacion_cap.motores_status = "off"
+                    #motor_rotacion_cap.motores_status = "off"
                     time.sleep(0.2) 
                     tacho_actual, motor_rotacion_dist.sentido, maquina.sensor = elegir_tacho_a_llenar(maquina.contenedores, maquina, traslacion, ORDEN_LLENADO) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
                     #if tacho_actual != None:  # else WARNING VACIAME LOS TACHOS FRENALO
                     #    mover_cinta(maquina, traslacion, tacho_actual)
                     #    print(f"{tacho_actual=}")
                     if tacho_actual == None:
+                        motor_rotacion_cap.motores_status = "off"
                         """stop()"""
                         print("Los tachos estan llenos!!")
                         mqtt_client.send_metric("metricas/codigo", 0)
                 else:
                     while camara.buffer < 70:
+                        motor_rotacion_cap.motores_status = "off"
                         # llamar a camara que saque la foto y cargue el valor del buffer
                         print("sacando fotos")
                         time.sleep(5)

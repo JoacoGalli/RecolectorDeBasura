@@ -19,7 +19,7 @@ class Maquina_del_mal():
         self.posicion_cinta = None # 1 2 3 4        
         self.posicion_cinta_cm = 8
         self.sensor = 0
-        self.posicion_media = { "0": 10.5, "1": 25.5, "2": 41, "3":52.3 , "4": 6, "5": 22.5 , "6": 38.7 ,"7": 51.5} 
+        self.posicion_media = { "0": 10.5, "1": 24.5, "2": 40.5, "3":53 , "4": 6, "5": 22.5 , "6": 38.7 ,"7": 51.5} 
         self.set_maquina()
 
     def set_maquina(self):
@@ -290,7 +290,7 @@ class Motores_traslacion(threading.Thread):
         self.mode_pin = (-1, -1, -1)
         self.motor_traslacion_nema = motor.A4988Nema(
             self.direcction, self.step, self.mode_pin, "A4988")
-
+        #self.reset_motores_traslacion()
     def activar_motores_traslacion(self):
         while self.motores_status == 'on':
             time.sleep(0.01)
