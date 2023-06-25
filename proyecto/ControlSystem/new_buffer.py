@@ -1,38 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.image as img
 
 import numpy as np
-from img_process import gabor_img, hilbert_img, mean_transform, outline
+from img_process import gabor_img, hilbert_img, mean_transform, outline #entropy_transform, 
 from skimage.color import rgba2rgb, rgb2gray
 from skimage.filters import gabor_kernel
-#from picamera import PiCamera
-import time
-
-# saco foto y la voy pisando en la mismo imagen asi no ocupa mucho espacio,
-# podriamos guradarlas asi nos sirve para el infrome
-#def sacar_foto(nombre):
-#    camera = PiCamera()
-#    camera.resolution = (800, 600)
-#    camera.vflip = True
-#    camera.contrast = 10
-#    time.sleep(0.5)
-#    camera.capture(nombre)
-#    print("Foto capturada.")
-#    camera.close()
 
 
 
-#img_camara = img.imread('img2.jpg') # esta va a ser la foto que vamos a ir sacando con la camara
 def buffer_porcentaje(foto):
-    print("Arranca el buffer %")
-    img_camara = img.imread(foto)
-    img_buffer = img.imread('blanco_negro.jpg') # Esta es la imagen del buffer en blanco y negro
-
-    img_total_number = len(img_camara)
+    img_camara = img.imread(foto) # esta va a ser la foto que vamos a ir sacando con la camara
+    img_buffer = img.imread('buffer_vacio_bn.jpg')
 
     if img_camara.shape[2] == 4:
+
         img_aux_color = rgba2rgb(img_camara)
     else:
         img_aux_color = img_camara
@@ -44,7 +28,11 @@ def buffer_porcentaje(foto):
         img_aux_color = img_buffer
     img_buffer_bn = np.round(rgb2gray(img_aux_color))
 
-    img_buffer_outline = outline(img_buffer_bn, img_camara)
+
+    # Se detecta el buffer vacio y se forma el controno para luego ser comparado
+    # lo podemos dejar en una funcion en un futuro
+    #########
+    #img_buffer_outline = outline(img_buffer_bn, img_camara)
 
     total_rows = img_buffer_bn.shape[0]
     total_columns = img_buffer_bn.shape[1]
@@ -54,7 +42,24 @@ def buffer_porcentaje(foto):
     buffer_end_column = np.max(np.where(np.matrix.transpose(img_buffer_bn) == 1)[0]) # filas y columnas que limitan al buffer
     index_margin = 50
     index_img = [np.max([buffer_start_row - index_margin, 0]), np.min([total_rows, buffer_end_row + index_margin]),np.max([buffer_start_column - index_margin, 0]), np.min([total_columns, buffer_end_column + index_margin])]
+    ###########
+    print("cuanto tiempo paso")
+    # impresión del contorno del buffer vacio
 
+    # plt.figure(0)
+    # plt.subplot(1, 3, 1)
+    # plt.imshow(img_camara[index_img[0]:index_img[1], index_img[2]:index_img[3]]) 
+    # plt.xticks([])
+    # plt.yticks([])
+    # plt.grid(False)
+    # plt.box(False)
+
+    # plt.imshow(img_buffer_bn[index_img[0]:index_img[1], index_img[2]:index_img[3]], cmap = 'gray', vmin = 0, vmax = 1)
+    # plt.imshow(img_buffer_outline[index_img[0]:index_img[1], index_img[2]:index_img[3]])
+
+    """## Preprocesamiento"""
+
+    # imagen obtenida con el filtro de Gabor, es unicamente del buffer vacio, busca el contorno
 
     lam = 4 # lambda (longitud de onda)
     pi_fraction = np.array(range(10))/10
@@ -75,7 +80,7 @@ def buffer_porcentaje(foto):
     img_gabor_g = 1 - img_gabor_g
 
     # imagen obtenida con el recorrido de Hilbert
-    edge_thr = 0.5 # bajar para detectar más basura
+    edge_thr = 0.1 # bajar para detectar más basura
     img_edge_bn, img_edge_g = hilbert_img(img_camara_g, edge_thr)
 
     """## Transformadas"""
@@ -83,50 +88,43 @@ def buffer_porcentaje(foto):
     # parámetros del kernel para las transformadas
     kernel_size = 32
 
-    # umbrales para la detección de basura
-    mean_edge_thr = 0.97 # subir para detectar más basura
+    mean_edge_thr = 0.95 # subir para detectar más basura
 
     # imágenes transformadas
-
-    # ACA TENEMOS QUE DECIDIR CON QUE METODO NOS QUEDAMOS
-    print("todavia no")
     img_edge_mean_tr_bn, img_edge_mean_tr_g = mean_transform(img_edge_bn, img_buffer_bn, kernel_size, mean_edge_thr, True)
-    
-    
-    # esto es para mostrar imagenes nomas
-    #img_edge_mean_outline = outline(img_edge_mean_tr_bn, img_camara)
 
-    # Impresión la dejo comentada pero no la vamos a necesitar
-    #plt.figure(figsize = (2.5, 2.5)) #individuales para el informe
+    img_edge_mean_outline = outline(img_edge_mean_tr_bn, img_camara)
 
-    #plt.subplot(2, 2, 2)
-    #plt.imshow(img_edge_mean_tr_bn[index_img[0]:index_img[1], index_img[2]:index_img[3]], cmap = 'gray', vmin = 0, vmax = 1)
-    #plt.xticks([])
-    #plt.yticks([])
-    #plt.grid(False)
-    #plt.box(False)
 
-    #plt.subplot(2, 2, 4)
-    #plt.imshow(img_edge_mean_outline[index_img[0]:index_img[1], index_img[2]:index_img[3]])
-    #plt.xticks([])
-    #plt.yticks([])
-    #plt.grid(False)
-    #plt.box(False)
-    #plt.show()
+    # plt.figure(figsize = (2.5, 2.5)) #individuales para el informe
+
+    # plt.subplot(2, 2, 2)
+    # plt.imshow(img_edge_mean_tr_bn[index_img[0]:index_img[1], index_img[2]:index_img[3]], cmap = 'gray', vmin = 0, vmax = 1)
+    # plt.xticks([])
+    # plt.yticks([])
+    # plt.grid(False)
+    # plt.box(False)
+
+    # plt.subplot(2, 2, 4)
+    # plt.imshow(img_edge_mean_outline[index_img[0]:index_img[1], index_img[2]:index_img[3]])
+    # plt.xticks([])
+    # plt.yticks([])
+    # plt.grid(False)
+    # plt.box(False)
+    # plt.show()
 
     filling_percentage = np.sum(img_buffer_bn* img_edge_mean_tr_bn)/np.sum(img_buffer_bn)*100
 
     print(f'El % de llenado del buffer es de {filling_percentage}')
-    return filling_percentage
 
 if __name__ == "__main__":
-    
-    nombre = "tapas_multicolor.jpg"
+    nombres = ["buffer_25.jpg","buffer_50.jpg","buffer_75.jpg","buffer_100.jpg"]
+    for n in nombres:
     #sacar_foto(nombre)
     #buffer_porcentaje(nombre)
     #tiempo_st = time.time()
     #sacar_foto(nombre)
-    buffer_porcentaje(nombre)
+        buffer_porcentaje(n)
     #tiempo_end = time.time()
     #print(f"Tardo en total {tiempo_end-tiempo_st}")    
     

@@ -2,8 +2,8 @@ import time
 import threading
 from RpiMotorLib import RpiMotorLib as motor
 import RPi.GPIO as GPIO
-from statistics import mean
 from new_buffer import buffer_porcentaje
+from mqtt_influx_class import MQTTClient
 import numpy as np
 
 # from sensores import medir_si_esta_ponton, medir_ubicacion_cinta, mover_cinta_traslacion, medir_buffer, activar_motores_rotacion, reset_motores_rotacion
@@ -419,14 +419,14 @@ class Camara(threading.Thread):
     def run(self):
         
         self.mqtt_client.send_metric(self.metricas, 80)
-        time.sleep(10)
-        names = ["tapas_multicolor.jpg", "tapas_rojas.jpg"]
+        #time.sleep(10)
+        names = [["buffer_25.jpg","buffer_50.jpg","buffer_75.jpg","buffer_100.jpg"]]
         for n in names:
             self.buffer = buffer_porcentaje(n)
             self.mqtt_client.send_metric(self.metricas, self.buffer)
             time.sleep(60)
 
-if __name__ == "__main__":
+if __name__ == "__main__2":
     n = "n"
     motor = Motores_traslacion(n)
     motor.start()
@@ -443,3 +443,9 @@ if __name__ == "__main__":
     time.sleep(8)
     motor.motores_status = "off"
     motor.fin()
+
+if __name__ == "__main__":
+    mqtt_client = MQTTClient()
+    cam = Camara()
+    cam.start()
+    time.sleep(300)
