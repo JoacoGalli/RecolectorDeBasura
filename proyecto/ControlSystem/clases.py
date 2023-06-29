@@ -60,17 +60,6 @@ class Maquina_del_mal():
     def ubicacion_cinta(self, sentido):  
         self.posicion_cinta_cm = self.medir_ubicacion_cinta(sentido)
         
-        if 0 < self.posicion_cinta_cm < 13:
-            self.posicion_cinta = 0
-        elif 13 < self.posicion_cinta_cm < 30:
-            self.posicion_cinta = 1
-        elif  30 < self.posicion_cinta_cm < 43:
-            self.posicion_cinta = 2
-        elif  43 < self.posicion_cinta_cm < 51:
-            self.posicion_cinta = 3
-        else:
-            print("Fuera de rango")
-        
         self.mqtt_client.send_metric(
             "metricas/distribucion_pos", self.posicion_cinta)
         self.mqtt_client.send_metric(
@@ -78,16 +67,19 @@ class Maquina_del_mal():
 
     def medir_llenado_tachos(self, sensor, tacho):
         if sensor == 1:
-            self.contenedores[str(tacho)] = self.medir_llenado(
-                sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
-            topic = "metricas/tacho" + str(tacho)
-            self.mqtt_client.send_metric(
-                topic, self.contenedores[str(tacho)])
-            print(self.contenedores[str(tacho)])
+            aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
+            if aux > self.contenedores[str(tacho)]:
+                    self.contenedores[str(tacho)] = aux
+                    topic = "metricas/tacho" + str(tacho)
+                    self.mqtt_client.send_metric( topic, self.contenedores[str(tacho)])
+                    print(self.contenedores[str(tacho)])
         if sensor == 2:
-            self.contenedores[str(tacho)] = self.medir_llenado(sensor)
-            topic = "metricas/tacho" + str(tacho)
-            self.mqtt_client.send_metric(topic, self.contenedores[str(tacho)])
+            aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
+            if aux > self.contenedores[str(tacho)]:
+                    self.contenedores[str(tacho)] = aux
+                    topic = "metricas/tacho" + str(tacho)
+                    self.mqtt_client.send_metric( topic, self.contenedores[str(tacho)])
+                    print(self.contenedores[str(tacho)])
 
     def medir_si_esta_ponton(self):
         ti = time.time()
@@ -231,12 +223,8 @@ class Maquina_del_mal():
                 
                 # % llenado
                 # hay que redefinir esto tambien ------------------------
-                if distancia > distancia_vacio + 2 :
+                if distancia > distancia_vacio :
                     pass
-                #elif distancia == 'nan':
-                #    pass
-                #elif type(distancia) != float:
-                #    pass
                 else:
                     list_dist.append(distancia)
         
@@ -255,13 +243,12 @@ class Maquina_del_mal():
         #    topic, distancias_descartadas)
         #distancias_filtradas = np.mean(distancias_filtradas)
         #print(f'estas son las {distancias_filtradas=}')
-        distancias_filtradas = np.mean(list_dist)
-        porcentaje = (distancia_vacio - distancias_filtradas) * 100 / \
-            (distancia_vacio - distancia_lleno)
-        
-        print(f'estas son las {distancias_filtradas=}')
-        return porcentaje
-
+        if list_dist:
+            distancias_filtradas = np.mean(list_dist)
+            porcentaje = (distancia_vacio - distancias_filtradas) * 100 / (distancia_vacio - distancia_lleno)
+            print(f'estas son las {distancias_filtradas=}')
+            return porcentaje
+        return 0
 
 class Motores_traslacion(threading.Thread):
 
