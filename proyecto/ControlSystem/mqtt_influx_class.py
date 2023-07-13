@@ -47,7 +47,7 @@ class InfluxDB_Client:
 
 class MQTTClient(InfluxDB_Client):
     def __init__(self):
-        self.broker_url = '192.168.219.9' # Nacho WIFI
+        self.broker_url = '192.168.4.50' # Nacho WIFI
         self.broker_port = 1883
         self.client = mqtt.Client()
         self.influxdb_client = InfluxDB_Client()

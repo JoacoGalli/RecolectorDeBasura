@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 from new_buffer import buffer_porcentaje
 from mqtt_influx_class import MQTTClient
 import numpy as np
-
+import cv2
 
 class Maquina_del_mal():
     def __init__(self, mqtt_client):
@@ -14,7 +14,7 @@ class Maquina_del_mal():
         self.contenedores = {"0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0}     
         self.posicion_cinta_cm = 0
         self.sensor = 0
-        # Posiciones en las que la cinta va a ubicar para hacer mediciones en cada contenedor
+        # Posiciones en las que la cinta va a ubicarse para hacer mediciones en cada contenedor
         self.posicion_media = { "0": 10.5, "1": 24.5, "2": 40.5, "3":53 , "4": 6, "5": 22.5 , "6": 38.7 ,"7": 51.5} 
         self.config()
 
@@ -129,20 +129,20 @@ class Maquina_del_mal():
 
     def ubicacion_cinta(self, sentido):  
         self.posicion_cinta_cm = self.medir_ubicacion_cinta(sentido)
-        self.mqtt_client.send_metric("metricas/distribucion_pos", self.posicion_cinta)
+        #self.mqtt_client.send_metric("metricas/distribucion_pos", self.posicion_cinta) Deberiamos implementar que exista del 0 al 7 en posiciones
         self.mqtt_client.send_metric("metricas/distribucion_pos_cm", self.posicion_cinta_cm)
 
 
     def medir_llenado_contenedor(self, sensor, contenedor):
         if sensor == 1:
-            aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
+            aux = self.medir_llenado(sensor)
             if aux > self.contenedores[str(contenedor)]:
                     self.contenedores[str(contenedor)] = aux
                     topic = "metricas/tacho" + str(contenedor)
                     self.mqtt_client.send_metric( topic, self.contenedores[str(contenedor)])
                     print(self.contenedores[str(contenedor)])
         if sensor == 2:
-            aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
+            aux = self.medir_llenado(sensor)
             if aux > self.contenedores[str(contenedor)]:
                     self.contenedores[str(contenedor)] = aux
                     topic = "metricas/tacho" + str(contenedor)
@@ -245,9 +245,6 @@ class Motores_traslacion(threading.Thread):
                     self.mqtt_client.send_metric(self.metricas, 0)
                     self.mqtt_client.send_metric(self.metricas + "_vel",self.velocidad)
                     cont += 1
-                #-------------
-                # El cont lo puse dentro del if == 0, no tenia sentido si no, nunca aumentaba.
-                #-------------
             else:
                 pass
 
@@ -329,7 +326,7 @@ class Motores_rotacion(threading.Thread):
                     print("envio las metricas de apagado 1 vez")
                     self.mqtt_client.send_metric(self.metricas, 0)
                     self.mqtt_client.send_metric(self.metricas + "_vel", self.velocidad)
-                    cont +=1
+                    cont += 1
             else:
                 pass         
                 
@@ -343,18 +340,22 @@ class Camara(threading.Thread):
         self.mqtt_client = mqtt_client
         self.metricas = "/metricas/buffer" 
     
-    def tomar_foto(nombre):
-        pass
+    def tomar_foto(self, nombre):
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+        ret, frame = cap.read()
+        cv2.imwrite(nombre, frame)
+        cap.release()
 
     def fin(self):
         self.stop_event.set()
 
     def run(self):
         while not self.stop_event.is_set():
-            # --------------------------
-            # Falta la funcion que esta en el escritorio de la RPI para sacar fotos
-            # --------------------------
-            self.tomar_foto("foto_buffer.jpg")
-            self.buffer = buffer_porcentaje("foto_buffer.jpg")
+            #self.tomar_foto("foto_buffer.jpg")
+            #self.buffer = buffer_porcentaje("foto_buffer.jpg")
+            #self.buffer = buffer_porcentaje("buffer_75.jpg")
+            self.buffer = 90
             self.mqtt_client.send_metric(self.metricas, self.buffer)
             time.sleep(60)

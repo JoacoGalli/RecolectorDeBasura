@@ -39,7 +39,7 @@ def mover_cinta(maquina, traslacion, pos):
     # No deberiamos mejorar esto? ponerlo mas bajo que 1.5??
     #----------------------------------------------
     # Puede ya estar ubicada en el lugar donde se le pide.
-    if (maquina.posicion_media[str(pos)]-1.5 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)]+1.5):
+    if (maquina.posicion_media[str(pos)] - 1 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)] + 1):
         print(f"Cinta de distribucón en contenedor Nro: {pos}.Comienza el llenado")
     else:
         # Se decide si se mueve la cinta hacia la popa o a la proa
@@ -66,8 +66,8 @@ if __name__ == "__main__":
     camara = Camara(mqtt_client)
     camara.start()
 
-    motor_rotacion_dist = Motores_rotacion(mqtt_client,tipo="dist", camara=camara.buffer)
-    motor_rotacion_cap = Motores_rotacion(mqtt_client, tipo="cap", camara=camara.buffer)
+    motor_rotacion_dist = Motores_rotacion(mqtt_client, "dist", camara.buffer)
+    motor_rotacion_cap = Motores_rotacion(mqtt_client, "cap", camara.buffer)
     traslacion = Motores_traslacion(mqtt_client)
     time.sleep(1)
     motor_rotacion_dist.start()
