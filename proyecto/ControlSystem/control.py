@@ -1,92 +1,71 @@
 import time
-import logging
+import threading
+import RPi.GPIO as GPIO
+from mqtt_influx_class import MQTTClient
 
 from clases import Motores_rotacion, Motores_traslacion, Maquina_del_mal, Camara
-import threading
-from mqtt_influx_class import MQTTClient
-import sys
 
-#ORDEN_LLENADO = [3,7,2,6,1,5,0,4]
 
-def elegir_tacho_a_llenar(cont, maquina, traslacion, ORDEN_LLENADO):
-    print(f"{ORDEN_LLENADO=}")
-    aux = []
-    clockwise = None
+def elegir_contenedor_a_llenar(cont, maquina, traslacion, orden_llenado):
+    sentido_horario = None
     sensor = None
-    for x in ORDEN_LLENADO:
-        print(f"El que deberia llenar es {x=}")
-        #maquina.medir_llenado_tachos(2,posicion) # mido el de atras
-        #if cont[str(ORDEN_LLENADO[x])] < 70: # Este 90 tiene que coincidir con el que hace prender los motores en el main
+    for x in orden_llenado:
+        # Se setean las variables para la cinta de distribucion con respecto al contenedor a llenar
         if x in [0,1,2,3]:
-                clockwise = 0
-                sensor = 1
-                mover_cinta(maquina, traslacion, x)
-                time.sleep(0.2)
-                maquina.medir_llenado_tachos(sensor,x)
-                time.sleep(0.5) 
-                if cont[str(x)] < 50: # Este 90 tiene que coincidir con el que hace prender los motores en el main
-                    pos = x
-                    ORDEN_LLENADO.remove(x)
-                    print(f"te mando a llenar este: {x}")
-                    #print(f"{ORDEN_LLENADO=}")
-                    return pos, clockwise, sensor
-                print(f"pase por {x} y era mas de 50")
-                ORDEN_LLENADO.remove(x)
-        else:
-                clockwise = 1
-                sensor = 2
-                mover_cinta(maquina, traslacion, x)
-                time.sleep(0.2)
-                maquina.medir_llenado_tachos(sensor,x)
-                time.sleep(0.5)
-                if cont[str(x)] < 50: # Este 90 tiene que coincidir con el que hace prender los motores en el main
-                    pos = x
-                    ORDEN_LLENADO.remove(x)
-                    print(f"te mando a llenar este: {x}")
-                    #print(f"{ORDEN_LLENADO=}")
-                    return pos, clockwise, sensor
-                ORDEN_LLENADO.remove(x)
-                print(f"pase por {x} y era mas de 50")
-    print("Tacho actual = None, porque estan todos llenos")     
-    return None,0,1
+            sentido_horario = False
+            sensor = 1
+        elif x in [4,5,6,7]:
+            sentido_horario = True
+            sensor = 2
+
+        mover_cinta(maquina, traslacion, x)
+        time.sleep(0.2)
+        maquina.medir_llenado_contenedor(sensor,x)
+        time.sleep(0.2) 
+        if cont[str(x)] < 50: # el umbral debe coincidir con el que hace prender los motores en el main
+            pos = x
+            orden_llenado.remove(x)
+            print(f"te mando a llenar este: {x}")
+            return pos, sentido_horario, sensor
+        # El contenedor esta lleno, lo saco de los posibles a llenar
+        orden_llenado.remove(x)
+
+    print("Contenedor actual = None, porque estan todos llenos")     
+    return None,sentido_horario,sensor
 
 def mover_cinta(maquina, traslacion, pos):
-    maquina.medir_ubicacion_cinta_inicial() 
+    # ----------------------------------------------
+    # Saque el medicion posicion inicial, lo deje por unica vez cuando arranca el main
+    # No deberiamos mejorar esto? ponerlo mas bajo que 1.5??
+    #----------------------------------------------
+    # Puede ya estar ubicada en el lugar donde se le pide.
     if (maquina.posicion_media[str(pos)]-1.5 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)]+1.5):
-        print("ya estoy aca")
+        print(f"Cinta de distribucón en contenedor Nro: {pos}.Comienza el llenado")
     else:
+        # Se decide si se mueve la cinta hacia la popa o a la proa
         if (maquina.posicion_cinta_cm - maquina.posicion_media[str(pos)]) > 0 :
-            traslacion.clockwise = True
-            traslacion.motores_status = "on"
-        #print(f"{maquina.posicion_media[str(pos)]=}")
-        #print(f"{maquina.posicion_cinta_cm}")
-            while not ( (maquina.posicion_media[str(pos)] - 1) < maquina.posicion_cinta_cm < (maquina.posicion_media[str(pos)] + 1)) :
-                #print(" no salgo del while")
-                maquina.ubicacion_cinta(traslacion.clockwise)
-                print(f"{maquina.posicion_cinta_cm=}")
-                #time.sleep(0.2)
-            traslacion.motores_status = "off"
-        if (maquina.posicion_cinta_cm - maquina.posicion_media[str(pos)]) <  0 :
-            traslacion.clockwise = False
-            traslacion.motores_status = "on"
-            while not( maquina.posicion_media[str(pos)] - 1 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)] + 1) :
-                maquina.ubicacion_cinta(traslacion.clockwise)
-                print(f"{maquina.posicion_cinta_cm=}")
-                #print("estoy en el otro while")
-                #time.sleep(0.2)
-            traslacion.motores_status = "off"
-    print("llegue al que elegi, ahora lleno")
+            traslacion.sentido_horario = True
+            traslacion.estado = "on"
+        elif (maquina.posicion_cinta_cm - maquina.posicion_media[str(pos)]) <  0 :
+            traslacion.sentido_horario = False
+            traslacion.estado = "on"
 
+        # Hasta que no se encuentre en la posicion deseada, se continua moviendo
+        while not((maquina.posicion_media[str(pos)] - 1) < maquina.posicion_cinta_cm < (maquina.posicion_media[str(pos)] + 1)) :
+            maquina.ubicacion_cinta(traslacion.sentido_horario)
+        traslacion.estado = "off"
+    print(f"Cinta de distribucón en contenedor Nro: {pos}. Comienza el llenado.")
 
 
 if __name__ == "__main__":
-    # Definimos las 3 clases (3 threads)
+    # Se inicializan las clases en threads diferentes.
     mqtt_client = MQTTClient()
     mqtt_thread = threading.Thread(target=mqtt_client.run_mqtt_client)
     mqtt_thread.start()
+
     camara = Camara(mqtt_client)
-    #camara.start()
-    maquina = Maquina_del_mal(mqtt_client)
+    camara.start()
+
     motor_rotacion_dist = Motores_rotacion(mqtt_client,tipo="dist", camara=camara.buffer)
     motor_rotacion_cap = Motores_rotacion(mqtt_client, tipo="cap", camara=camara.buffer)
     traslacion = Motores_traslacion(mqtt_client)
@@ -94,69 +73,70 @@ if __name__ == "__main__":
     motor_rotacion_dist.start()
     motor_rotacion_cap.start()
     traslacion.start()
-    time.sleep(1)
-    camara.buffer = 80
-    ORDEN_LLENADO = [3,7,2,6,1,5,0,4]
 
+    maquina = Maquina_del_mal(mqtt_client)
+    time.sleep(1)
+    
+    orden_llenado = [3,7,2,6,1,5,0,4]
+
+    # Enviar metrica codigo en proceso.
     mqtt_client.send_metric("metricas/codigo", 1)
-    while(True):
-        if maquina.esta_ponton():
-            maquina.medir_ubicacion_cinta_inicial()
-            
-           # for posicion in [0,1,2,3,7,6,5,4]:
-           #     print(f"{posicion=} y {maquina.posicion_cinta}")
-           #     mover_cinta(maquina, traslacion, posicion)
-           #     if posicion in [0, 1, 2, 3]:    
-           #         print("mido con sensor 1")
-           #         maquina.medir_llenado_tachos(1,posicion) #mido el de adelante
-           #         print(f"{maquina.contenedores=}")
-           #     else:
-           #         print("paso a medir el 2")
-           #         maquina.medir_llenado_tachos(2,posicion) # mido el de atras
-           #         print(f"{maquina.contenedores=}")
-            #print("********% contenedores**************")
-            #print(f"{maquina.contenedores=}")
-            tacho_actual, motor_rotacion_dist.sentido, maquina.sensor = elegir_tacho_a_llenar(maquina.contenedores, maquina, traslacion, ORDEN_LLENADO) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
-            #mover_cinta(maquina, traslacion, tacho_actual)
-            if camara.buffer > 70 and tacho_actual != None:
-                motor_rotacion_cap.motores_status = "on"
-                while camara.buffer > 20 and tacho_actual != None:
-                    print("pase el buffer")
-                    print(f"{maquina.contenedores=}")
-                    time.sleep(1)
-                    motor_rotacion_dist.motores_status = "on"
-                    #motor_rotacion_cap.motores_status = "on"
-                    while maquina.contenedores[str(tacho_actual)] < 50:  # este 90 tiene que coincidir con el de elegir_tacho_a_llenar()
-                        maquina.medir_llenado_tachos(maquina.sensor,tacho_actual)
-                        print(f"{maquina.contenedores=}")
-                    motor_rotacion_dist.motores_status = "off"
-                    #motor_rotacion_cap.motores_status = "off"
-                    time.sleep(0.2) 
-                    tacho_actual, motor_rotacion_dist.sentido, maquina.sensor = elegir_tacho_a_llenar(maquina.contenedores, maquina, traslacion, ORDEN_LLENADO) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
-                    #if tacho_actual != None:  # else WARNING VACIAME LOS TACHOS FRENALO
-                    #    mover_cinta(maquina, traslacion, tacho_actual)
-                    #    print(f"{tacho_actual=}")
-                    if tacho_actual == None:
-                        motor_rotacion_cap.motores_status = "off"
-                        """stop()"""
-                        print("Los tachos estan llenos!!")
-                        mqtt_client.send_metric("metricas/codigo", 0)
+
+    try:
+        while True:
+            # Se verifica que este el ponton.
+            if maquina.deteccion_ponton():
+                # Se mide la posicion en la que se encuentra la cinta de distribucion por primera vez (None)
+                maquina.medir_ubicacion_cinta(None)
+                contenedor_actual, motor_rotacion_dist.sentido_horario, maquina.sensor = elegir_contenedor_a_llenar(maquina.contenedores, maquina, traslacion, orden_llenado) 
+                # La cinta de distribucion se encuentra en el contenedor a llenar.
+                # Se verifica que el buffer tenga basura y los contenedores no esten llenos.
+                if camara.buffer > 70 and contenedor_actual != None:
+                    # Se enciende el motor de captacion, hasta que se llenen todos los contenedores.
+                    motor_rotacion_cap.estado = "on"
+                    while camara.buffer > 20 and contenedor_actual != None:
+                        motor_rotacion_dist.estado = "on"
+                        # Si el contenedor no esta lleno, continuo
+                        while maquina.contenedores[str(contenedor_actual)] < 50:  # 50 tiene que coincidir con el de elegir_contenedor_a_llenar()
+                            maquina.medir_llenado_contenedor(maquina.sensor,contenedor_actual)
+                            print(f"{maquina.contenedores=}")
+                        
+                        motor_rotacion_dist.estado = "off"
+                        time.sleep(0.2)
+                        # Se coloca la cinta en el proximo contenedor a llenar. 
+                        contenedor_actual, motor_rotacion_dist.sentido_horario, maquina.sensor = elegir_contenedor_a_llenar(maquina.contenedores, maquina, traslacion, orden_llenado) # elige un tacho, si estan todos llenos devuelve false, con motores_rotacion ademas elige el sentido de rotacion (ej: 1,2,3,4 entonces izquierda)
+                        if contenedor_actual == None:
+                            motor_rotacion_cap.estado = "off"
+                            print("Los contenedores estan llenos!!")
+                            mqtt_client.send_metric("metricas/codigo", 0)
+                    else:
+                        # -------------------------------------------------
+                        # Esto tiene que ir? para mi si es mayor a 0 sigue.
+                        # -------------------------------------------------
+                        while camara.buffer < 70:
+                            motor_rotacion_cap.estado = "off"
+                            # llamar a camara que saque la foto y cargue el valor del buffer
+                            print("sacando fotos")
+                            time.sleep(60)
                 else:
-                    while camara.buffer < 70:
-                        motor_rotacion_cap.motores_status = "off"
-                        # llamar a camara que saque la foto y cargue el valor del buffer
-                        print("sacando fotos")
-                        time.sleep(5)
-                    
-                
+                    motor_rotacion_cap.estado = "off"
+                    mqtt_client.send_metric("metricas/codigo", 0)
+                    print("Los contenedores estan llenos. Retirar pontón y vaciar contenedores.")
             else:
                 """stop()"""
+                print("El pontón fue retirado.")
                 mqtt_client.send_metric("metricas/codigo", 0)
-                print("Los tachos estan llenos!!")
-        else:
-            """stop()"""
-            print("No esta el ponton")
-            mqtt_client.send_metric("metricas/codigo", 0)
-            break
+                motor_rotacion_dist.fin()
+                motor_rotacion_cap.fin()
+                traslacion.fin()
+                camara.fin()
+                GPIO.cleanup()
+                break
 
-# Medir la bateria y mandarla al dashboard
+    except KeyboardInterrupt:
+        mqtt_client.send_metric("metricas/codigo", 0)
+        motor_rotacion_dist.fin()
+        motor_rotacion_cap.fin()
+        traslacion.fin()
+        camara.fin()
+        GPIO.cleanup()
