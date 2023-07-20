@@ -24,7 +24,7 @@ def elegir_tacho_a_llenar(cont, maquina, traslacion, ORDEN_LLENADO):
                 time.sleep(0.2)
                 maquina.medir_llenado_tachos(sensor,x)
                 time.sleep(0.5) 
-                if cont[str(x)] < 50: # Este 90 tiene que coincidir con el que hace prender los motores en el main
+                if cont[str(x)] < 32: # Este 90 tiene que coincidir con el que hace prender los motores en el main
                     pos = x
                     ORDEN_LLENADO.remove(x)
                     print(f"te mando a llenar este: {x}")
@@ -39,7 +39,7 @@ def elegir_tacho_a_llenar(cont, maquina, traslacion, ORDEN_LLENADO):
                 time.sleep(0.2)
                 maquina.medir_llenado_tachos(sensor,x)
                 time.sleep(0.5)
-                if cont[str(x)] < 50: # Este 90 tiene que coincidir con el que hace prender los motores en el main
+                if cont[str(x)] < 32: # Este 90 tiene que coincidir con el que hace prender los motores en el main
                     pos = x
                     ORDEN_LLENADO.remove(x)
                     print(f"te mando a llenar este: {x}")
@@ -52,7 +52,7 @@ def elegir_tacho_a_llenar(cont, maquina, traslacion, ORDEN_LLENADO):
 
 def mover_cinta(maquina, traslacion, pos):
     maquina.medir_ubicacion_cinta_inicial() 
-    if (maquina.posicion_media[str(pos)]-1.5 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)]+1.5):
+    if (maquina.posicion_media[str(pos)]-0.65 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)]+0.65):
         print("ya estoy aca")
     else:
         if (maquina.posicion_cinta_cm - maquina.posicion_media[str(pos)]) > 0 :
@@ -60,20 +60,20 @@ def mover_cinta(maquina, traslacion, pos):
             traslacion.motores_status = "on"
         #print(f"{maquina.posicion_media[str(pos)]=}")
         #print(f"{maquina.posicion_cinta_cm}")
-            while not ( (maquina.posicion_media[str(pos)] - 1) < maquina.posicion_cinta_cm < (maquina.posicion_media[str(pos)] + 1)) :
+            while not ( (maquina.posicion_media[str(pos)] - 0.65) < maquina.posicion_cinta_cm < (maquina.posicion_media[str(pos)] + 0.65)) :
                 #print(" no salgo del while")
                 maquina.ubicacion_cinta(traslacion.clockwise)
                 print(f"{maquina.posicion_cinta_cm=}")
-                #time.sleep(0.2)
+                time.sleep(0.1)
             traslacion.motores_status = "off"
         if (maquina.posicion_cinta_cm - maquina.posicion_media[str(pos)]) <  0 :
             traslacion.clockwise = False
             traslacion.motores_status = "on"
-            while not( maquina.posicion_media[str(pos)] - 1 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)] + 1) :
+            while not( maquina.posicion_media[str(pos)] - 0.65 < maquina.posicion_cinta_cm < maquina.posicion_media[str(pos)] + 0.65) :
                 maquina.ubicacion_cinta(traslacion.clockwise)
                 print(f"{maquina.posicion_cinta_cm=}")
                 #print("estoy en el otro while")
-                #time.sleep(0.2)
+                time.sleep(0.1)
             traslacion.motores_status = "off"
     print("llegue al que elegi, ahora lleno")
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     motor_rotacion_cap.start()
     traslacion.start()
     time.sleep(1)
-    camara.buffer = 80
+    camara.buffer = 85
     ORDEN_LLENADO = [3,7,2,6,1,5,0,4]
 
     mqtt_client.send_metric("metricas/codigo", 1)
@@ -123,10 +123,9 @@ if __name__ == "__main__":
                 while camara.buffer > 20 and tacho_actual != None:
                     print("pase el buffer")
                     print(f"{maquina.contenedores=}")
-                    time.sleep(1)
                     motor_rotacion_dist.motores_status = "on"
                     #motor_rotacion_cap.motores_status = "on"
-                    while maquina.contenedores[str(tacho_actual)] < 50:  # este 90 tiene que coincidir con el de elegir_tacho_a_llenar()
+                    while maquina.contenedores[str(tacho_actual)] < 32:  # este 90 tiene que coincidir con el de elegir_tacho_a_llenar()
                         maquina.medir_llenado_tachos(maquina.sensor,tacho_actual)
                         print(f"{maquina.contenedores=}")
                     motor_rotacion_dist.motores_status = "off"

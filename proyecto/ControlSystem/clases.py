@@ -17,9 +17,9 @@ class Maquina_del_mal():
         self.contenedores = {"0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0}
         self.buffer = None
         self.posicion_cinta = None # 1 2 3 4        
-        self.posicion_cinta_cm = 8
+        self.posicion_cinta_cm = 0
         self.sensor = 0
-        self.posicion_media = { "0": 10.5, "1": 24.5, "2": 40.5, "3":53 , "4": 6, "5": 22.5 , "6": 38.7 ,"7": 51.5} 
+        self.posicion_media = { "0": 9.5, "1": 26, "2": 40.5, "3":56.5 , "4": 5, "5": 20.5 , "6": 36 ,"7": 51.5} 
         self.set_maquina()
 
     def set_maquina(self):
@@ -181,17 +181,17 @@ class Maquina_del_mal():
                 trigger = self.trigger_tacho_1
                 echo = self.echo_tacho_1
                 distancia_vacio = 14.5
-                distancia_lleno = 2
+                distancia_lleno = 5 
         else:
                 trigger =None
                 echo = None
                 print("No voy a medir nada")
         
         list_dist = []
-        for x in range(10):    
+        for x in range(7):    
                 # Ponemos en bajo el pin TRIG y después esperamos 0.5 seg para que el transductor se estabilice
                 GPIO.output(trigger, GPIO.LOW)
-                time.sleep(0.3)
+                time.sleep(0.6)
 
                 #Ponemos en alto el pin TRIG esperamos 10 uS antes de ponerlo en bajo
                 GPIO.output(trigger, GPIO.HIGH)
@@ -269,7 +269,7 @@ class Motores_traslacion(threading.Thread):
         self.clockwise = False
         self.step_type = "Full"
         self.steps = 100
-        self.velocidades = [0.01, 0.009, 0.008, 0.007]
+        self.velocidades = [0.025,0.01, 0.009, 0.008, 0.007]
         self.velocidad = 0
         self.verbose = False
         self.init_delay = 0.01
@@ -280,7 +280,6 @@ class Motores_traslacion(threading.Thread):
         #self.reset_motores_traslacion()
     def activar_motores_traslacion(self):
         while self.motores_status == 'on':
-            time.sleep(0.01)
             self.mqtt_client.send_metric(self.metricas, 1)
             self.mqtt_client.send_metric(self.metricas+"_vel", self.velocidad)
             self.motor_traslacion_nema.motor_go(
