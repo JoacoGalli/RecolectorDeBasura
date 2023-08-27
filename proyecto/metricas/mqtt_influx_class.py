@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 from influxdb_client import WritePrecision, InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from typing import NamedTuple
+import threading
 
 class SensorData(NamedTuple):
     tag: str
@@ -59,7 +60,7 @@ class MQTTClient(InfluxDB_Client):
     def parse_mqtt_message(self, topic, payload):
         msg = topic.split('/') # [measurement,tag] [metrica,buffer]
         print(msg)
-        if msg:
+        if payload and msg:
             measurement = msg[0]
             tag = msg[1]
             return SensorData(tag, measurement, float(payload))
@@ -76,3 +77,8 @@ class MQTTClient(InfluxDB_Client):
         #self.client.on_message = self.on_message
         self.client.subscribe("metricas/#")
         self.client.loop_forever()
+
+mqtt_client = MQTTClient()
+
+mqtt_thread = threading.Thread(target=mqtt_client.run_mqtt_client)
+mqtt_thread.start()

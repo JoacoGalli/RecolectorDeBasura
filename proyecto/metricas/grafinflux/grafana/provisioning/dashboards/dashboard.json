@@ -115,6 +115,82 @@
           "color": {
             "mode": "thresholds"
           },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 1,
+                  "text": "Desacoplado"
+                },
+                "1": {
+                  "color": "dark-green",
+                  "index": 0,
+                  "text": "Acoplado"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 5,
+        "y": 0
+      },
+      "id": 46,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"ponton\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Ponton",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "BwDD30WVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -166,7 +242,7 @@
       "gridPos": {
         "h": 3,
         "w": 8,
-        "x": 8,
+        "x": 10,
         "y": 0
       },
       "id": 26,
@@ -213,6 +289,112 @@
     },
     {
       "datasource": {
+        "type": "influxdb",
+        "uid": "BwDD30WVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value distribucion_pos_cm"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "cm"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Distancia"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value distribucion_pos"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Contenedor actual"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 18,
+        "y": 0
+      },
+      "id": 45,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 20,
+          "valueSize": 50
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"distribucion_pos_nro_cont\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "BwDD30WVz"
+          },
+          "hide": false,
+          "query": "from(bucket: \"metricas\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"metricas\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"distribucion_pos_cm\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Contenedor Actual",
+      "type": "stat"
+    },
+    {
+      "datasource": {
         "type": "datasource",
         "uid": "grafana"
       },
@@ -229,11 +411,10 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<img src=\"https://www.fundacionsadosky.org.ar/wp-content/uploads/2013/10/255x185_fiuba.png\" width=\"1000\" height=\"115\"/>\n",
+        "content": "<img src=\"http://localhost:8000/logo_fiuba2.png\" alt=\"Logo FIUBA\">\n",
         "mode": "html"
       },
       "pluginVersion": "9.2.0",
-      "transparent": true,
       "type": "text"
     },
     {
@@ -276,10 +457,23 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 100,
@@ -357,10 +551,23 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 100,
@@ -438,10 +645,22 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 100,
@@ -519,10 +738,22 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 100,
@@ -600,10 +831,23 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 98,
@@ -681,10 +925,22 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 98,
@@ -762,10 +1018,22 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 98,
@@ -843,10 +1111,23 @@
               "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
               "type": "special"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "100"
+                },
+                "to": 200
+              },
+              "type": "range"
             }
           ],
           "max": 98,
@@ -1535,8 +1816,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1627,6 +1907,6 @@
   "timezone": "",
   "title": "Metricas GIDIS",
   "uid": "cDvq7s6kk",
-  "version": 4,
+  "version": 9,
   "weekStart": ""
 }
