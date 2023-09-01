@@ -43,7 +43,7 @@ def hilbert_img(img, edge_thr = 0.05):
     n_hil = 2
     p_hil = np.ceil(np.log2(max_dim)).astype(int)
     #p_hil = 1 el valor que me da p_hil con la resolucion que yo quiero es el que tengo que generar y nada mas.
-    print(p_hil)
+    #print(p_hil)
     square_size = n_hil**p_hil
     img_edge = np.ones((square_size, square_size))
     img_hilbert = np.zeros((square_size, square_size))

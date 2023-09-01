@@ -5,6 +5,8 @@ import RPi.GPIO as GPIO
 from new_buffer import buffer_porcentaje
 from mqtt_influx_class import MQTTClient
 import numpy as np
+import cv2
+import subprocess
 
 # from sensores import medir_si_esta_ponton, medir_ubicacion_cinta, mover_cinta_traslacion, medir_buffer, activar_motores_rotacion, reset_motores_rotacion
 
@@ -19,7 +21,7 @@ class Maquina_del_mal():
         self.posicion_cinta = None # 1 2 3 4        
         self.posicion_cinta_cm = 0
         self.sensor = 0
-        self.posicion_media = { "0": 9.5, "1": 26, "2": 40.5, "3":56.5 , "4": 5, "5": 20.5 , "6": 36 ,"7": 51.5} 
+        self.posicion_media = { "0": 51, "1": 36, "2": 21.5, "3":5.5 , "4": 56, "5": 40.5, "6": 25 ,"7": 10.3} 
         self.set_maquina()
 
     def set_maquina(self):
@@ -48,39 +50,6 @@ class Maquina_del_mal():
         self.sensor_ir = 21
         GPIO.setup(self.sensor_ir, GPIO.IN)
 
-    def esta_ponton(self):
-        self.ponton = self.medir_si_esta_ponton()
-        if self.ponton:
-            value = 1
-        else:
-            value = 0
-        self.mqtt_client.send_metric("metricas/ponton", value)
-        return self.ponton
-
-    def ubicacion_cinta(self, sentido):  
-        self.posicion_cinta_cm = self.medir_ubicacion_cinta(sentido)
-        
-        self.mqtt_client.send_metric(
-            "metricas/distribucion_pos", self.posicion_cinta)
-        self.mqtt_client.send_metric(
-            "metricas/distribucion_pos_cm", self.posicion_cinta_cm)
-
-    def medir_llenado_tachos(self, sensor, tacho):
-        if sensor == 1:
-            aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
-            if aux > self.contenedores[str(tacho)]:
-                    self.contenedores[str(tacho)] = aux
-                    topic = "metricas/tacho" + str(tacho)
-                    self.mqtt_client.send_metric( topic, self.contenedores[str(tacho)])
-                    print(self.contenedores[str(tacho)])
-        if sensor == 2:
-            aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
-            if aux > self.contenedores[str(tacho)]:
-                    self.contenedores[str(tacho)] = aux
-                    topic = "metricas/tacho" + str(tacho)
-                    self.mqtt_client.send_metric( topic, self.contenedores[str(tacho)])
-                    print(self.contenedores[str(tacho)])
-
     def medir_si_esta_ponton(self):
         ti = time.time()
         tf = time.time()
@@ -96,26 +65,33 @@ class Maquina_del_mal():
             print("Se detecto el Ponton")
         else:
             print("No se detecto el Ponton")
+
         return ponton
 
-    def medir_ubicacion_cinta(self, sentido):
-        
-        distancia = None
-        while distancia == None:
-            GPIO.output(self.trigger_ubi, GPIO.LOW)
+    def esta_ponton(self):
+        self.ponton = self.medir_si_esta_ponton()
+        if self.ponton:
+            value = 1
+        else:
+            value = 0
+        self.mqtt_client.send_metric("metricas/ponton", value)
+        return self.ponton
+    
+    def distancia_ultrasonido(self, trigger, echo):
+            GPIO.output(trigger, GPIO.LOW)
             time.sleep(0.5)
-            GPIO.output(self.trigger_ubi, GPIO.HIGH)
+            GPIO.output(trigger, GPIO.HIGH)
             time.sleep(0.00001)
-            GPIO.output(self.trigger_ubi, GPIO.LOW)
+            GPIO.output(trigger, GPIO.LOW)
 
             while True:
                 pulso_inicio = time.time()
-                if GPIO.input(self.echo_ubi) == GPIO.HIGH:
+                if GPIO.input(echo) == GPIO.HIGH:
                     break
 
             while True:
                 pulso_fin = time.time()
-                if GPIO.input(self.echo_ubi) == GPIO.LOW:
+                if GPIO.input(echo) == GPIO.LOW:
                     break
 
             # Tiempo medido en segundos
@@ -123,51 +99,49 @@ class Maquina_del_mal():
 
             # Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
             distancia = (self.sound_speed * duracion) / 2
-            print(f"{distancia}")
-            #return distancia
-            if sentido == False:
-                #print("sentido False")
-                #print(f"estoy haciendo {self.posicion_cinta_cm} < {distancia} < {self.posicion_cinta_cm + 3}")
-                if self.posicion_cinta_cm <  distancia < (self.posicion_cinta_cm + 3):
-                    #print(distancia)
+            return distancia
+        
+
+
+    def medir_ubicacion_cinta(self, sentido):
+        distancia = None
+        while distancia == None:
+            distancia = self.distancia_ultrasonido(self.trigger_ubi, self.echo_ubi)
+            print(f"{distancia=}")
+            if sentido == True:
+                if self.posicion_cinta_cm <  distancia < (self.posicion_cinta_cm + 2.5):
                     return distancia
                 else:
                     distancia = None
             else:
-                #print("sentido Truo")
-                #print(f"estoy haciendo {self.posicion_cinta_cm -3} < {distancia} < {self.posicion_cinta_cm}")
-                if (self.posicion_cinta_cm - 3) < distancia < self.posicion_cinta_cm:
-                    print(distancia)
+                if (self.posicion_cinta_cm - 2.5) < distancia < self.posicion_cinta_cm:
+                    #self.mqtt_client.send_metric(self.metricas, distancia)
                     return distancia
                 else:
                     distancia = None
-
-
-    def medir_ubicacion_cinta_inicial(self):
         
-            GPIO.output(self.trigger_ubi, GPIO.LOW)
-            time.sleep(0.5)
-            GPIO.output(self.trigger_ubi, GPIO.HIGH)
-            time.sleep(0.00001)
-            GPIO.output(self.trigger_ubi, GPIO.LOW)
 
-            while True:
-                pulso_inicio = time.time()
-                if GPIO.input(self.echo_ubi) == GPIO.HIGH:
-                    break
+    def ubicacion_cinta(self, sentido):  
+        self.posicion_cinta_cm = self.medir_ubicacion_cinta(sentido)
+        
+        self.mqtt_client.send_metric(
+            "metricas/distribucion_pos", self.posicion_cinta)
+        self.mqtt_client.send_metric(
+            "metricas/distribucion_pos_cm", self.posicion_cinta_cm)
 
-            while True:
-                pulso_fin = time.time()
-                if GPIO.input(self.echo_ubi) == GPIO.LOW:
-                    break
-
-            # Tiempo medido en segundos
-            duracion = pulso_fin - pulso_inicio
-
-            # Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
-            distancia = (self.sound_speed * duracion) / 2
-            print(f"inicial {distancia}")
+    def medir_ubicacion_cinta_inicial(self):        
+            distancia = self.distancia_ultrasonido(self.trigger_ubi, self.echo_ubi)
+            print(f"Posicion inicial del la cinta de distrbucion {distancia} cm")
             self.posicion_cinta_cm = distancia
+
+    def medir_llenado_tachos(self, sensor, tacho):
+        aux = self.medir_llenado(sensor)  # cuando tenga los 2 sensores, hay que especificar cual usar
+        if aux > self.contenedores[str(tacho)]:
+                self.contenedores[str(tacho)] = aux
+                topic = "metricas/tacho" + str(tacho)
+                self.mqtt_client.send_metric( topic, self.contenedores[str(tacho)])
+                print(self.contenedores[str(tacho)])
+
     
     def medir_llenado(self, sensor):
         #trigger = self.trigger_tacho_1
@@ -180,7 +154,7 @@ class Maquina_del_mal():
         elif sensor == 1:
                 trigger = self.trigger_tacho_1
                 echo = self.echo_tacho_1
-                distancia_vacio = 14.5
+                distancia_vacio = 12
                 distancia_lleno = 5 
         else:
                 trigger =None
@@ -189,60 +163,12 @@ class Maquina_del_mal():
         
         list_dist = []
         for x in range(7):    
-                # Ponemos en bajo el pin TRIG y después esperamos 0.5 seg para que el transductor se estabilice
-                GPIO.output(trigger, GPIO.LOW)
-                time.sleep(0.6)
-
-                #Ponemos en alto el pin TRIG esperamos 10 uS antes de ponerlo en bajo
-                GPIO.output(trigger, GPIO.HIGH)
-                time.sleep(0.00001)
-                GPIO.output(trigger, GPIO.LOW)
-
-                # En este momento el sensor envía 8 pulsos ultrasónicos de 40kHz y coloca su pin ECHO en alto
-                # Debemos detectar dicho evento para iniciar la medición del tiempo
-                
-                while True:
-                    pulso_inicio = time.time()
-                    if GPIO.input(echo) == GPIO.HIGH:
-                        break
-
-                # El pin ECHO se mantendrá en HIGH hasta recibir el eco rebotado por el obstáculo. 
-                # En ese momento el sensor pondrá el pin ECHO en bajo.
-                # Prodedemos a detectar dicho evento para terminar la medición del tiempo
-                
-                while True:
-                    pulso_fin = time.time()
-                    if GPIO.input(echo) == GPIO.LOW:
-                        break
-
-                # Tiempo medido en segundos
-                duracion = pulso_fin - pulso_inicio
-
-                #Obtenemos la distancia considerando que la señal recorre dos veces la distancia a medir y que la velocidad del sonido es 343m/s
-                distancia = (self.sound_speed * duracion) / 2
-                
-                # % llenado
-                # hay que redefinir esto tambien ------------------------
+                distancia = self.distancia_ultrasonido(trigger, echo)
                 if distancia > distancia_vacio :
                     pass
                 else:
                     list_dist.append(distancia)
-        
-        # Descartar mediciones que difieren significativamente de la mediana
-        #mediana = np.median(list_dist)
-        #diff = np.abs(list_dist - mediana)
-        #mediana_absoluta = np.median(diff)
-        #factor = 5  # Ajusta el factor según sea necesario
-        #umbral = factor * mediana_absoluta
-        #distancias_filtradas = [
-        #    d for d in list_dist if np.abs(d - mediana) <= umbral]
-        #distancias_descartadas = [
-        #    d for d in list_dist if np.abs(d - mediana) > umbral]
-        #topic = "metricas/distancias_descartadas"
-        #self.mqtt_client.send_metric(
-        #    topic, distancias_descartadas)
-        #distancias_filtradas = np.mean(distancias_filtradas)
-        #print(f'estas son las {distancias_filtradas=}')
+
         if list_dist:
             distancias_filtradas = np.mean(list_dist)
             porcentaje = (distancia_vacio - distancias_filtradas) * 100 / (distancia_vacio - distancia_lleno)
@@ -269,8 +195,8 @@ class Motores_traslacion(threading.Thread):
         self.clockwise = False
         self.step_type = "Full"
         self.steps = 100
-        self.velocidades = [0.025,0.01, 0.009, 0.008, 0.007]
-        self.velocidad = 0
+        self.velocidades = [0.025,0.02, 0.009, 0.008, 0.007]
+        self.velocidad = 1
         self.verbose = False
         self.init_delay = 0.01
         self.metricas = "metricas/motor_traslacion"
@@ -289,6 +215,8 @@ class Motores_traslacion(threading.Thread):
         self.motor_traslacion_nema.motor_stop()
 
     def fin(self):
+        self.motores_status = "off" 
+        self.reset_motores_traslacion()
         self.stop_event.set()
 
     def run(self):
@@ -360,6 +288,7 @@ class Motores_rotacion(threading.Thread):
             self.velocidad = 2
         elif  80 < self.camara < 100:
             self.velocidad = 3
+        #self.velocidad = 3
 
         self.mqtt_client.send_metric(self.metricas, 1)
         self.mqtt_client.send_metric(
@@ -375,7 +304,7 @@ class Motores_rotacion(threading.Thread):
             time.sleep(self.velocidades[self.velocidad]) # Dictates how fast stepper motor will run
     
     def fin(self):
-        GPIO.cleanup()
+        self.motores_status = "off"
         self.stop_event.set()
     
     def run(self):
@@ -386,7 +315,6 @@ class Motores_rotacion(threading.Thread):
                 self.activar_motores_rotacion()
             elif self.motores_status == 'off':
                 if cont == 0:
-                    print("envio las metricas de apagado 1 vez")
                     self.mqtt_client.send_metric(self.metricas, 0)
                     self.mqtt_client.send_metric(self.metricas + "_vel", self.velocidad)
                 cont +=1
@@ -395,22 +323,42 @@ class Motores_rotacion(threading.Thread):
                 pass         
                 
                 
+            
 class Camara(threading.Thread):
-    def __init__(self, mqtt_client):
+    def __init__(self, mqtt):
         super().__init__()
         self.daemon = True
-        self.buffer = 0
-        self.mqtt_client = mqtt_client
-        self.metricas = "/metricas/buffer" 
+        self.stop_event = threading.Event()
+        self.buffer = 2
+        self.mqtt_client = mqtt
+        self.metricas = "metricas/" 
+    
+    def tomar_foto(self, nombre):
+        subprocess.run(["python", "capturar_foto.py", nombre])  # Pasar el nombre de archivo como argumento
+        #cap = cv2.VideoCapture(0)
+        #cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+        #cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+        #ret, frame = cap.read()
+        #print("saque la foto")
+        #cv2.imwrite(nombre, frame)
+        #cap.release()
+
+    def fin(self):
+        self.stop_event.set()
+
     def run(self):
-        
-        self.mqtt_client.send_metric(self.metricas, 80)
-        #time.sleep(10)
-        names = [["buffer_25.jpg","buffer_50.jpg","buffer_75.jpg","buffer_100.jpg"]]
-        for n in names:
-            self.buffer = buffer_porcentaje(n)
-            self.mqtt_client.send_metric(self.metricas, self.buffer)
-            time.sleep(60)
+        count = 0
+        valor = [30, 40, 60, 70, 50, 80, 25, 64, 83, 47, 77, 58, 62, 91, 70, 64, 72, 87, 95, 77, 55, 64, 70, 75 ]*2
+        while not self.stop_event.is_set():
+            n = str(count)
+            self.bufffer = valor[count] 
+            #self.tomar_foto("foto_buffer_"+n+".jpg")
+            #self.buffer = buffer_porcentaje("foto_buffer_"+n+".jpg")
+            self.mqtt_client.send_metric(
+            self.metricas + "buffer", self.buffer)
+            #print('envie metricas')
+            count += 1
+            time.sleep(75)
 
 if __name__ == "__main__2":
     n = "n"
@@ -432,6 +380,9 @@ if __name__ == "__main__2":
 
 if __name__ == "__main__":
     mqtt_client = MQTTClient()
-    cam = Camara()
-    cam.start()
-    time.sleep(300)
+    for x in range(100):
+        mqtt_client.send_metric("/metricas/buffer", x)
+        print(x)
+        time.sleep(2)
+    #cam.start()
+    #time.sleep(300)
