@@ -1,21 +1,47 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import os
 
 # Ruta al archivo CSV
 csv_file = 'datos_completos.csv'  # Asegúrate de que esta ruta sea correcta
 
+# Carpeta donde se guardarán los gráficos
+output_folder = 'graficos_tachos'  # Cambia a la carpeta deseada
+
+# Crear la carpeta si no existe
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
 # Carga los datos desde el archivo CSV en un DataFrame de Pandas
 df = pd.read_csv(csv_file)
 
-# Filtra los datos de la métrica "metricas" y el campo "distribucion_pos_cm"
-#metricas_df = df[df['measurement'] == 'metricas']
-# Muestra los nombres de todas las columnas en el DataFrame
-# Filtra los datos donde la columna 'sensor' es igual a 'tacho7'
-tacho7_data = df[df['sensor'] == 'distribucion_pos_cm']
+# Obtén la lista de tachos disponibles en los datos
+tachos = df['sensor'].unique()
 
-# Selecciona solo las columnas '_time' y '_value'
-tacho7_data = tacho7_data[['sensor', '_time', '_value']]
-print(tacho7_data)
-# # Muestra los primeros n registros del campo "distribucion_pos_cm"
-# n = 50
-# print(distribucion_pos_cm.head(n))
+# Genera un gráfico de dispersión para cada tacho
+for tacho in tachos:
+    # Filtra los datos para el tacho actual
+    tacho_data = df[df['sensor'] == tacho]
+    
+    # Selecciona las columnas '_time' y '_value'
+    x = tacho_data['_time']
+    y = tacho_data['_value']
+    
+    # Crea el gráfico de dispersión
+    plt.figure(figsize=(10, 6))  # Tamaño del gráfico
+    plt.scatter(x, y, label=tacho, s=5)  # Crea el gráfico de dispersión
+    
+    # Etiquetas y título del gráfico
+    plt.xlabel('Tiempo')
+    plt.ylabel('Valor')
+    plt.title(f'Gráfico de dispersión para {tacho}')
+    
+    # Guarda el gráfico en la carpeta de salida
+    output_file = os.path.join(output_folder, f'grafico_{tacho}.png')
+    plt.savefig(output_file)
+    
+    # Cierra el gráfico para evitar la superposición
+    plt.close()
+
+print('Gráficos generados y guardados en la carpeta de salida.')
 
