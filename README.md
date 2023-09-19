@@ -1,6 +1,6 @@
-# Instrucciones para ejecutar la Máquina de Estados del Recolector de Basura
+# Instrucciones para ejecutar el Interceptor de Residuos Flotantes.
 
-Este README proporciona instrucciones detalladas sobre cómo ejecutar el programa de la Máquina de Estados para el Recolector de Basura. Este programa automatiza el control del recolector, recopila métricas a través de MQTT, las almacena en una base de datos InfluxDB y muestra estas métricas en Grafana.
+Este README proporciona instrucciones detalladas sobre cómo ejecutar el programa del IRF. Este programa automatiza el control del recolector, recopila métricas a través de MQTT, las almacena en una base de datos InfluxDB y muestra estas métricas en Grafana.
 
 ## Requisitos Previos
 
